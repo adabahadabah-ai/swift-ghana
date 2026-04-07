@@ -9,38 +9,209 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as BuyRouteImport } from './routes/buy'
+import { Route as AgentSignupRouteImport } from './routes/agent-signup'
+import { Route as AgentRouteImport } from './routes/agent'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentIndexRouteImport } from './routes/agent.index'
+import { Route as StoreAgentIdRouteImport } from './routes/store.$agentId'
+import { Route as AgentSubAgentsRouteImport } from './routes/agent.sub-agents'
+import { Route as AgentStoreRouteImport } from './routes/agent.store'
+import { Route as AgentSettingsRouteImport } from './routes/agent.settings'
+import { Route as AgentOrdersRouteImport } from './routes/agent.orders'
+import { Route as AgentEarningsRouteImport } from './routes/agent.earnings'
+import { Route as AgentCustomersRouteImport } from './routes/agent.customers'
+import { Route as AgentBuyRouteImport } from './routes/agent.buy'
 
+const BuyRoute = BuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentSignupRoute = AgentSignupRouteImport.update({
+  id: '/agent-signup',
+  path: '/agent-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentRoute = AgentRouteImport.update({
+  id: '/agent',
+  path: '/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentIndexRoute = AgentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AgentRoute,
+} as any)
+const StoreAgentIdRoute = StoreAgentIdRouteImport.update({
+  id: '/store/$agentId',
+  path: '/store/$agentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentSubAgentsRoute = AgentSubAgentsRouteImport.update({
+  id: '/sub-agents',
+  path: '/sub-agents',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentStoreRoute = AgentStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentSettingsRoute = AgentSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentOrdersRoute = AgentOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentEarningsRoute = AgentEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentCustomersRoute = AgentCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentBuyRoute = AgentBuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
+  getParentRoute: () => AgentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agent': typeof AgentRouteWithChildren
+  '/agent-signup': typeof AgentSignupRoute
+  '/buy': typeof BuyRoute
+  '/agent/buy': typeof AgentBuyRoute
+  '/agent/customers': typeof AgentCustomersRoute
+  '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/orders': typeof AgentOrdersRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/store': typeof AgentStoreRoute
+  '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/store/$agentId': typeof StoreAgentIdRoute
+  '/agent/': typeof AgentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agent-signup': typeof AgentSignupRoute
+  '/buy': typeof BuyRoute
+  '/agent/buy': typeof AgentBuyRoute
+  '/agent/customers': typeof AgentCustomersRoute
+  '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/orders': typeof AgentOrdersRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/store': typeof AgentStoreRoute
+  '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/store/$agentId': typeof StoreAgentIdRoute
+  '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agent': typeof AgentRouteWithChildren
+  '/agent-signup': typeof AgentSignupRoute
+  '/buy': typeof BuyRoute
+  '/agent/buy': typeof AgentBuyRoute
+  '/agent/customers': typeof AgentCustomersRoute
+  '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/orders': typeof AgentOrdersRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/store': typeof AgentStoreRoute
+  '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/store/$agentId': typeof StoreAgentIdRoute
+  '/agent/': typeof AgentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/agent'
+    | '/agent-signup'
+    | '/buy'
+    | '/agent/buy'
+    | '/agent/customers'
+    | '/agent/earnings'
+    | '/agent/orders'
+    | '/agent/settings'
+    | '/agent/store'
+    | '/agent/sub-agents'
+    | '/store/$agentId'
+    | '/agent/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/agent-signup'
+    | '/buy'
+    | '/agent/buy'
+    | '/agent/customers'
+    | '/agent/earnings'
+    | '/agent/orders'
+    | '/agent/settings'
+    | '/agent/store'
+    | '/agent/sub-agents'
+    | '/store/$agentId'
+    | '/agent'
+  id:
+    | '__root__'
+    | '/'
+    | '/agent'
+    | '/agent-signup'
+    | '/buy'
+    | '/agent/buy'
+    | '/agent/customers'
+    | '/agent/earnings'
+    | '/agent/orders'
+    | '/agent/settings'
+    | '/agent/store'
+    | '/agent/sub-agents'
+    | '/store/$agentId'
+    | '/agent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentRoute: typeof AgentRouteWithChildren
+  AgentSignupRoute: typeof AgentSignupRoute
+  BuyRoute: typeof BuyRoute
+  StoreAgentIdRoute: typeof StoreAgentIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/buy': {
+      id: '/buy'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof BuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent-signup': {
+      id: '/agent-signup'
+      path: '/agent-signup'
+      fullPath: '/agent-signup'
+      preLoaderRoute: typeof AgentSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent': {
+      id: '/agent'
+      path: '/agent'
+      fullPath: '/agent'
+      preLoaderRoute: typeof AgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +219,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/': {
+      id: '/agent/'
+      path: '/'
+      fullPath: '/agent/'
+      preLoaderRoute: typeof AgentIndexRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/store/$agentId': {
+      id: '/store/$agentId'
+      path: '/store/$agentId'
+      fullPath: '/store/$agentId'
+      preLoaderRoute: typeof StoreAgentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/sub-agents': {
+      id: '/agent/sub-agents'
+      path: '/sub-agents'
+      fullPath: '/agent/sub-agents'
+      preLoaderRoute: typeof AgentSubAgentsRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/store': {
+      id: '/agent/store'
+      path: '/store'
+      fullPath: '/agent/store'
+      preLoaderRoute: typeof AgentStoreRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/settings': {
+      id: '/agent/settings'
+      path: '/settings'
+      fullPath: '/agent/settings'
+      preLoaderRoute: typeof AgentSettingsRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/orders': {
+      id: '/agent/orders'
+      path: '/orders'
+      fullPath: '/agent/orders'
+      preLoaderRoute: typeof AgentOrdersRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/earnings': {
+      id: '/agent/earnings'
+      path: '/earnings'
+      fullPath: '/agent/earnings'
+      preLoaderRoute: typeof AgentEarningsRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/customers': {
+      id: '/agent/customers'
+      path: '/customers'
+      fullPath: '/agent/customers'
+      preLoaderRoute: typeof AgentCustomersRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/buy': {
+      id: '/agent/buy'
+      path: '/buy'
+      fullPath: '/agent/buy'
+      preLoaderRoute: typeof AgentBuyRouteImport
+      parentRoute: typeof AgentRoute
+    }
   }
 }
 
+interface AgentRouteChildren {
+  AgentBuyRoute: typeof AgentBuyRoute
+  AgentCustomersRoute: typeof AgentCustomersRoute
+  AgentEarningsRoute: typeof AgentEarningsRoute
+  AgentOrdersRoute: typeof AgentOrdersRoute
+  AgentSettingsRoute: typeof AgentSettingsRoute
+  AgentStoreRoute: typeof AgentStoreRoute
+  AgentSubAgentsRoute: typeof AgentSubAgentsRoute
+  AgentIndexRoute: typeof AgentIndexRoute
+}
+
+const AgentRouteChildren: AgentRouteChildren = {
+  AgentBuyRoute: AgentBuyRoute,
+  AgentCustomersRoute: AgentCustomersRoute,
+  AgentEarningsRoute: AgentEarningsRoute,
+  AgentOrdersRoute: AgentOrdersRoute,
+  AgentSettingsRoute: AgentSettingsRoute,
+  AgentStoreRoute: AgentStoreRoute,
+  AgentSubAgentsRoute: AgentSubAgentsRoute,
+  AgentIndexRoute: AgentIndexRoute,
+}
+
+const AgentRouteWithChildren = AgentRoute._addFileChildren(AgentRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentRoute: AgentRouteWithChildren,
+  AgentSignupRoute: AgentSignupRoute,
+  BuyRoute: BuyRoute,
+  StoreAgentIdRoute: StoreAgentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
