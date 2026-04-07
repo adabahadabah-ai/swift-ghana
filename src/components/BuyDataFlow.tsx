@@ -19,6 +19,7 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
   const [phone, setPhone] = useState("");
   const [selectedBundle, setSelectedBundle] = useState<DataBundle | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const bundles = network ? dataBundles.filter((b) => b.network === network) : [];
 
@@ -29,15 +30,16 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
     return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
   };
 
-  const handleBuy = () => {
+  const handleProceed = () => {
     if (!phone || phone.replace(/\s/g, "").length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
-    if (!selectedBundle) {
-      toast.error("Please select a data bundle");
-      return;
-    }
+    setShowConfirm(true);
+  };
+
+  const handleConfirmPurchase = () => {
+    setShowConfirm(false);
     setShowSuccess(true);
   };
 
@@ -67,33 +69,22 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
           <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">1. Select Network</h2>
           <div className="grid grid-cols-3 gap-4">
             {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n) => (
-              <NetworkCard key={n} network={n} selected={network === n} onClick={() => { setNetwork(n); setSelectedBundle(null); }} />
+              <NetworkCard key={n} network={n} selected={network === n} onClick={() => { setNetwork(n); setSelectedBundle(null); setShowConfirm(false); }} />
             ))}
           </div>
         </div>
 
-        {/* Step 2: Phone */}
-        <div className="mb-10">
-          <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">2. Enter Phone Number</h2>
-          <Input
-            placeholder="024 XXX XXXX"
-            value={phone}
-            onChange={(e) => setPhone(formatPhone(e.target.value))}
-            className="h-12 text-lg bg-glass border-glass-border backdrop-blur-md rounded-xl"
-          />
-        </div>
-
-        {/* Step 3: Bundle */}
+        {/* Step 2: Bundle */}
         {network && (
           <div className="mb-10">
-            <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">3. Choose Bundle</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">2. Choose Bundle</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {bundles.map((b) => (
                 <GlassCard
                   key={b.id}
                   hover
                   className={`text-center cursor-pointer relative ${selectedBundle?.id === b.id ? "ring-2 ring-primary" : ""}`}
-                  onClick={() => setSelectedBundle(b)}
+                  onClick={() => { setSelectedBundle(b); setShowConfirm(false); }}
                 >
                   {b.popular && (
                     <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold gold-gradient text-primary-foreground">POPULAR</span>
@@ -115,9 +106,28 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
           </div>
         )}
 
-        {/* Checkout */}
+        {/* Step 3: Phone Number */}
         {selectedBundle && (
+          <div className="mb-10">
+            <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">3. Enter Phone Number</h2>
+            <Input
+              placeholder="024 XXX XXXX"
+              value={phone}
+              onChange={(e) => { setPhone(formatPhone(e.target.value)); setShowConfirm(false); }}
+              className="h-12 text-lg bg-glass border-glass-border backdrop-blur-md rounded-xl"
+            />
+            {!showConfirm && (
+              <Button variant="hero" size="xl" className="w-full mt-4" onClick={handleProceed}>
+                Continue
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Confirm */}
+        {showConfirm && selectedBundle && (
           <GlassCard variant="strong" className="mb-10">
+            <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">4. Confirm Purchase</h2>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
@@ -128,7 +138,7 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
                 <p>{phone || "No number"}</p>
               </div>
             </div>
-            <Button variant="hero" size="xl" className="w-full" onClick={handleBuy}>
+            <Button variant="hero" size="xl" className="w-full" onClick={handleConfirmPurchase}>
               <Zap className="h-5 w-5" /> Pay with Paystack
             </Button>
           </GlassCard>
@@ -139,7 +149,7 @@ export default function BuyDataFlow({ isAgent = false, storeName }: BuyDataFlowP
 
       <SuccessModal
         open={showSuccess}
-        onClose={() => { setShowSuccess(false); setSelectedBundle(null); setPhone(""); setNetwork(null); }}
+        onClose={() => { setShowSuccess(false); setSelectedBundle(null); setPhone(""); setNetwork(null); setShowConfirm(false); }}
         phone={phone}
         bundle={selectedBundle?.size}
         network={selectedBundle?.network}
