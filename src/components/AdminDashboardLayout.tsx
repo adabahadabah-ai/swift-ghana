@@ -1,0 +1,85 @@
+import { useState } from "react";
+import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  LayoutDashboard, DollarSign, FileText, Users, UserPlus,
+  Bell, Settings, Menu, X, LogOut, Shield
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const adminNav = [
+  { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
+  { label: "Manage Prices", to: "/admin/prices", icon: DollarSign },
+  { label: "Orders", to: "/admin/orders", icon: FileText },
+  { label: "Users", to: "/admin/users", icon: Users },
+  { label: "Agents", to: "/admin/agents", icon: UserPlus },
+  { label: "Notifications", to: "/admin/notifications", icon: Bell },
+  { label: "Settings", to: "/admin/settings", icon: Settings },
+];
+
+export default function AdminDashboardLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen flex">
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-background/80 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      <aside className={cn(
+        "fixed lg:sticky top-0 left-0 z-50 h-screen w-64 glass-card-strong border-r border-glass-border flex flex-col transition-transform duration-300",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <div className="p-5 flex items-center justify-between border-b border-glass-border">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-destructive/20 flex items-center justify-center">
+              <Shield className="h-4 w-4 text-destructive" />
+            </div>
+            <span className="font-heading font-bold text-foreground">Admin</span>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {adminNav.map((item) => {
+            const isActive = location.pathname === item.to || (item.to !== "/admin" && location.pathname.startsWith(item.to));
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setSidebarOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                  isActive ? "bg-gold-muted text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-3 border-t border-glass-border">
+          <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+            <LogOut className="h-4 w-4" /> Back to Site
+          </Link>
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-30 h-14 glass-card-strong border-b border-glass-border rounded-none flex items-center px-4 gap-4">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground">
+            <Menu className="h-5 w-5" />
+          </button>
+          <h1 className="text-sm font-heading font-semibold text-foreground">Admin Panel</h1>
+        </header>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
