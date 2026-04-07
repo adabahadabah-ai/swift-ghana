@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AgentSignupRouteImport } from './routes/agent-signup'
 import { Route as AgentRouteImport } from './routes/agent'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StoreAgentIdRouteImport } from './routes/store.$agentId'
 import { Route as AgentSubAgentsRouteImport } from './routes/agent.sub-agents'
 import { Route as AgentStoreRouteImport } from './routes/agent.store'
@@ -22,6 +24,12 @@ import { Route as AgentOrdersRouteImport } from './routes/agent.orders'
 import { Route as AgentEarningsRouteImport } from './routes/agent.earnings'
 import { Route as AgentCustomersRouteImport } from './routes/agent.customers'
 import { Route as AgentBuyRouteImport } from './routes/agent.buy'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPricesRouteImport } from './routes/admin.prices'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminAgentsRouteImport } from './routes/admin.agents'
 
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
@@ -38,6 +46,11 @@ const AgentRoute = AgentRouteImport.update({
   path: '/agent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -47,6 +60,11 @@ const AgentIndexRoute = AgentIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AgentRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const StoreAgentIdRoute = StoreAgentIdRouteImport.update({
   id: '/store/$agentId',
@@ -88,12 +106,49 @@ const AgentBuyRoute = AgentBuyRouteImport.update({
   path: '/buy',
   getParentRoute: () => AgentRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPricesRoute = AdminPricesRouteImport.update({
+  id: '/prices',
+  path: '/prices',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAgentsRoute = AdminAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agent': typeof AgentRouteWithChildren
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
@@ -102,12 +157,19 @@ export interface FileRoutesByFullPath {
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
@@ -116,14 +178,22 @@ export interface FileRoutesByTo {
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
+  '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agent': typeof AgentRouteWithChildren
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/prices': typeof AdminPricesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
@@ -132,15 +202,23 @@ export interface FileRoutesById {
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/agent'
     | '/agent-signup'
     | '/buy'
+    | '/admin/agents'
+    | '/admin/notifications'
+    | '/admin/orders'
+    | '/admin/prices'
+    | '/admin/settings'
+    | '/admin/users'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
@@ -149,12 +227,19 @@ export interface FileRouteTypes {
     | '/agent/store'
     | '/agent/sub-agents'
     | '/store/$agentId'
+    | '/admin/'
     | '/agent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agent-signup'
     | '/buy'
+    | '/admin/agents'
+    | '/admin/notifications'
+    | '/admin/orders'
+    | '/admin/prices'
+    | '/admin/settings'
+    | '/admin/users'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
@@ -163,13 +248,21 @@ export interface FileRouteTypes {
     | '/agent/store'
     | '/agent/sub-agents'
     | '/store/$agentId'
+    | '/admin'
     | '/agent'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/agent'
     | '/agent-signup'
     | '/buy'
+    | '/admin/agents'
+    | '/admin/notifications'
+    | '/admin/orders'
+    | '/admin/prices'
+    | '/admin/settings'
+    | '/admin/users'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
@@ -178,11 +271,13 @@ export interface FileRouteTypes {
     | '/agent/store'
     | '/agent/sub-agents'
     | '/store/$agentId'
+    | '/admin/'
     | '/agent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AgentRoute: typeof AgentRouteWithChildren
   AgentSignupRoute: typeof AgentSignupRoute
   BuyRoute: typeof BuyRoute
@@ -212,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -225,6 +327,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/agent/'
       preLoaderRoute: typeof AgentIndexRouteImport
       parentRoute: typeof AgentRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/store/$agentId': {
       id: '/store/$agentId'
@@ -282,8 +391,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentBuyRouteImport
       parentRoute: typeof AgentRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/prices': {
+      id: '/admin/prices'
+      path: '/prices'
+      fullPath: '/admin/prices'
+      preLoaderRoute: typeof AdminPricesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/agents': {
+      id: '/admin/agents'
+      path: '/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminPricesRoute: typeof AdminPricesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAgentsRoute: AdminAgentsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminPricesRoute: AdminPricesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AgentRouteChildren {
   AgentBuyRoute: typeof AgentBuyRoute
@@ -311,6 +484,7 @@ const AgentRouteWithChildren = AgentRoute._addFileChildren(AgentRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AgentRoute: AgentRouteWithChildren,
   AgentSignupRoute: AgentSignupRoute,
   BuyRoute: BuyRoute,

@@ -31,16 +31,13 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "SwiftData Ghana - Buy Affordable Data Instantly" },
+      { name: "description", content: "Ghana's #1 data reselling platform. Buy affordable MTN, AirtelTigo & Telecel data bundles instantly. Become an agent and earn." },
+      { name: "author", content: "SwiftData Ghana" },
+      { property: "og:title", content: "SwiftData Ghana - Buy Affordable Data Instantly" },
+      { property: "og:description", content: "Fast, reliable, affordable mobile data bundles for MTN, AirtelTigo & Telecel in Ghana." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://lovable.dev/opengraph-image-p98pqg.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:image", content: "https://lovable.dev/opengraph-image-p98pqg.png" },
     ],
     links: [
       {
