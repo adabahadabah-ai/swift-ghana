@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Zap, Shield, Users, ArrowRight, Star, ChevronRight } from "lucide-react";
+import { Zap, Shield, Users, ArrowRight, ChevronRight, Settings } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
-import { NetworkCard } from "@/components/NetworkCard";
-import { testimonials } from "@/lib/mock-data";
 import type { Network } from "@/lib/mock-data";
 
 function Navbar() {
@@ -32,7 +30,6 @@ function Navbar() {
 function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-      {/* Background effects */}
       <div className="absolute inset-0 bg-grid opacity-30" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-[120px]" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-primary/8 blur-[120px]" />
@@ -65,11 +62,13 @@ function HeroSection() {
           </div>
         </div>
 
-        {/* Network cards */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg mx-auto mt-16" style={{ animationDelay: "0.3s" }}>
+        {/* Network names without icons */}
+        <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg mx-auto mt-16">
           {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n) => (
             <Link key={n} to="/buy">
-              <NetworkCard network={n} className="hover-glow" />
+              <GlassCard hover className="text-center hover-glow">
+                <h3 className="text-lg font-heading font-bold text-foreground">{n}</h3>
+              </GlassCard>
             </Link>
           ))}
         </div>
@@ -81,8 +80,8 @@ function HeroSection() {
 function HowItWorks() {
   const steps = [
     { num: "01", title: "Choose Network", desc: "Select MTN, AirtelTigo, or Telecel" },
-    { num: "02", title: "Enter Number", desc: "Type the recipient's phone number" },
-    { num: "03", title: "Get Data Instantly", desc: "Pay and receive data in seconds" },
+    { num: "02", title: "Pick a Bundle", desc: "Choose your preferred data package" },
+    { num: "03", title: "Enter Number & Pay", desc: "Type recipient's number and pay instantly" },
   ];
 
   return (
@@ -145,35 +144,40 @@ function Benefits() {
   );
 }
 
-function Testimonials() {
+function BecomeAdmin() {
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4">
-            Loved by <span className="gold-text">Thousands</span>
+            Become an <span className="gold-text">Admin</span>
           </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Manage pricing, users, agents, and orders from a powerful admin dashboard.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((t, i) => (
-            <GlassCard key={i} hover>
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, j) => (
-                  <Star key={j} className="h-4 w-4 fill-primary text-primary" />
-                ))}
+        <GlassCard variant="strong" className="max-w-2xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-6">
+            <Settings className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <h3 className="text-xl font-heading font-bold text-foreground mb-3">Full Control Dashboard</h3>
+          <p className="text-muted-foreground mb-6 leading-relaxed">
+            Set data prices per network, manage all orders and transactions, view revenue analytics, and control user and agent accounts — all from one place.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {["Manage Prices", "View Orders", "Control Agents", "Revenue Reports"].map((feature) => (
+              <div key={feature} className="glass-card p-3 rounded-xl text-center">
+                <p className="text-xs font-medium text-foreground">{feature}</p>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{t.text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-xs font-bold text-primary-foreground">{t.avatar}</div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
+            ))}
+          </div>
+          <Button variant="hero" size="xl" asChild>
+            <Link to="/admin">
+              Go to Admin Dashboard <ArrowRight className="h-5 w-5" />
+            </Link>
+          </Button>
+        </GlassCard>
       </div>
     </section>
   );
@@ -232,7 +236,7 @@ export default function LandingPage() {
       <HeroSection />
       <HowItWorks />
       <Benefits />
-      <Testimonials />
+      <BecomeAdmin />
       <Footer />
     </div>
   );
