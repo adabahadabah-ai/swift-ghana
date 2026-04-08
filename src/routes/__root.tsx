@@ -1,6 +1,4 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { Toaster } from "sonner";
-import { AuthProvider } from "@/hooks/use-auth";
 
 import appCss from "../styles.css?url";
 
@@ -9,10 +7,17 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">The page you're looking for doesn't exist or has been moved.</p>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          Page not found
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
             Go home
           </Link>
         </div>
@@ -30,11 +35,20 @@ export const Route = createRootRoute({
       { name: "description", content: "Ghana's #1 data reselling platform. Buy affordable MTN, AirtelTigo & Telecel data bundles instantly. Become an agent and earn." },
       { name: "author", content: "SwiftData Ghana" },
       { property: "og:title", content: "SwiftData Ghana - Buy Affordable Data Instantly" },
-      { property: "og:description", content: "Fast, reliable, affordable mobile data bundles for MTN, AirtelTigo & Telecel in Ghana." },
+      { property: "og:description", content: "Ghana's #1 data reselling platform. Buy affordable MTN, AirtelTigo & Telecel data bundles instantly. Become an agent and earn." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "SwiftData Ghana - Buy Affordable Data Instantly" },
+      { name: "twitter:description", content: "Ghana's #1 data reselling platform. Buy affordable MTN, AirtelTigo & Telecel data bundles instantly. Become an agent and earn." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a21b3826-9072-408c-8b54-e5af58d8559f/id-preview-4f810f1c--fa4acd4d-b151-4592-bd33-6790eb11c742.lovable.app-1775647878465.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a21b3826-9072-408c-8b54-e5af58d8559f/id-preview-4f810f1c--fa4acd4d-b151-4592-bd33-6790eb11c742.lovable.app-1775647878465.png" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -56,10 +70,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-    <AuthProvider>
-      <Outlet />
-      <Toaster richColors position="top-right" />
-    </AuthProvider>
-  );
+  return <Outlet />;
 }
