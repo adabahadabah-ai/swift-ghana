@@ -2,9 +2,18 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Zap, Shield, Users, ArrowRight, ChevronRight, Settings } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
+import { useAuth } from "@/hooks/use-auth";
 import type { Network } from "@/lib/mock-data";
 
 function Navbar() {
+  const { isAuthenticated, hasRole } = useAuth();
+
+  const getDashboardLink = () => {
+    if (hasRole("admin")) return "/admin";
+    if (hasRole("agent")) return "/agent";
+    return "/";
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card-strong border-b border-glass-border rounded-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -14,8 +23,14 @@ function Navbar() {
         </Link>
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
           <Link to="/buy" className="hover:text-primary transition-colors">Buy Data</Link>
-          <Link to="/agent-signup" className="hover:text-primary transition-colors">Become Agent</Link>
-          <Link to="/agent" className="hover:text-primary transition-colors">Agent Login</Link>
+          {!isAuthenticated && (
+            <Link to="/agent-signup" className="hover:text-primary transition-colors">Become Agent</Link>
+          )}
+          {isAuthenticated ? (
+            <Link to={getDashboardLink()} className="hover:text-primary transition-colors">Dashboard</Link>
+          ) : (
+            <Link to="/login" className="hover:text-primary transition-colors">Login</Link>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="hero" size="sm" asChild>
