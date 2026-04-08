@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, ShoppingCart, FileText, Users, UserPlus,
   DollarSign, Globe, Settings, Menu, X, LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const agentNav = [
   { label: "Overview", to: "/agent", icon: LayoutDashboard },
@@ -21,6 +22,22 @@ const agentNav = [
 export default function AgentDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { signOut, loading, isAuthenticated, hasRole } = useAuth();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  }
+
+  if (!isAuthenticated || !hasRole("agent")) {
+    navigate({ to: "/login" });
+    return null;
+  }
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -67,13 +84,13 @@ export default function AgentDashboardLayout() {
         </nav>
 
         <div className="p-3 border-t border-glass-border">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full"
           >
             <LogOut className="h-4 w-4" />
             Log Out
-          </Link>
+          </button>
         </div>
       </aside>
 
