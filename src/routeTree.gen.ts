@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as AgentSignupRouteImport } from './routes/agent-signup'
 import { Route as AgentRouteImport } from './routes/agent'
@@ -31,6 +32,11 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminAgentsRouteImport } from './routes/admin.agents'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
   path: '/buy',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/agent': typeof AgentRouteWithChildren
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/login': typeof LoginRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/login': typeof LoginRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/agent': typeof AgentRouteWithChildren
   '/agent-signup': typeof AgentSignupRoute
   '/buy': typeof BuyRoute
+  '/login': typeof LoginRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/agent'
     | '/agent-signup'
     | '/buy'
+    | '/login'
     | '/admin/agents'
     | '/admin/notifications'
     | '/admin/orders'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agent-signup'
     | '/buy'
+    | '/login'
     | '/admin/agents'
     | '/admin/notifications'
     | '/admin/orders'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/agent'
     | '/agent-signup'
     | '/buy'
+    | '/login'
     | '/admin/agents'
     | '/admin/notifications'
     | '/admin/orders'
@@ -281,11 +293,19 @@ export interface RootRouteChildren {
   AgentRoute: typeof AgentRouteWithChildren
   AgentSignupRoute: typeof AgentSignupRoute
   BuyRoute: typeof BuyRoute
+  LoginRoute: typeof LoginRoute
   StoreAgentIdRoute: typeof StoreAgentIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buy': {
       id: '/buy'
       path: '/buy'
@@ -488,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentRoute: AgentRouteWithChildren,
   AgentSignupRoute: AgentSignupRoute,
   BuyRoute: BuyRoute,
+  LoginRoute: LoginRoute,
   StoreAgentIdRoute: StoreAgentIdRoute,
 }
 export const routeTree = rootRouteImport
