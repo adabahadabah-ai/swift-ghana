@@ -53,6 +53,9 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootShell,
+  scripts: () => [
+    { src: "https://js.paystack.co/v2/inline.js", async: true },
+  ],
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
