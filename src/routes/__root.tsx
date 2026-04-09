@@ -51,11 +51,11 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
+    scripts: [
+      { src: "https://js.paystack.co/v2/inline.js", attrs: { async: true } },
+    ],
   }),
   shellComponent: RootShell,
-  scripts: () => [
-    { src: "https://js.paystack.co/v2/inline.js", async: true },
-  ],
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
