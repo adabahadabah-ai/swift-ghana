@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, ShoppingCart, FileText, Users, UserPlus,
-  DollarSign, Globe, Settings, Menu, X, LogOut
+  DollarSign, Globe, Settings, Menu, X, LogOut, Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { NotificationPopup } from "@/components/NotificationPopup";
 
 const agentNav = [
   { label: "Overview", to: "/agent", icon: LayoutDashboard },
   { label: "Buy Data", to: "/agent/buy", icon: ShoppingCart },
+  { label: "Wallet", to: "/agent/wallet", icon: Wallet },
   { label: "My Orders", to: "/agent/orders", icon: FileText },
   { label: "Customers", to: "/agent/customers", icon: Users },
   { label: "Sub-Agents", to: "/agent/sub-agents", icon: UserPlus },
@@ -41,6 +43,8 @@ export default function AgentDashboardLayout() {
 
   return (
     <div className="min-h-screen flex">
+      <NotificationPopup />
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-background/80 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />

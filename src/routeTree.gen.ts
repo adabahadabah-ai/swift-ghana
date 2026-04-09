@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StoreAgentIdRouteImport } from './routes/store.$agentId'
+import { Route as AgentWalletRouteImport } from './routes/agent.wallet'
 import { Route as AgentSubAgentsRouteImport } from './routes/agent.sub-agents'
 import { Route as AgentStoreRouteImport } from './routes/agent.store'
 import { Route as AgentSettingsRouteImport } from './routes/agent.settings'
@@ -76,6 +77,11 @@ const StoreAgentIdRoute = StoreAgentIdRouteImport.update({
   id: '/store/$agentId',
   path: '/store/$agentId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AgentWalletRoute = AgentWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AgentRoute,
 } as any)
 const AgentSubAgentsRoute = AgentSubAgentsRouteImport.update({
   id: '/sub-agents',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/agent/wallet': typeof AgentWalletRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/agent/wallet': typeof AgentWalletRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
+  '/agent/wallet': typeof AgentWalletRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
+    | '/agent/wallet'
     | '/store/$agentId'
     | '/admin/'
     | '/agent/'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
+    | '/agent/wallet'
     | '/store/$agentId'
     | '/admin'
     | '/agent'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
+    | '/agent/wallet'
     | '/store/$agentId'
     | '/admin/'
     | '/agent/'
@@ -361,6 +373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/store/$agentId'
       preLoaderRoute: typeof StoreAgentIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/agent/wallet': {
+      id: '/agent/wallet'
+      path: '/wallet'
+      fullPath: '/agent/wallet'
+      preLoaderRoute: typeof AgentWalletRouteImport
+      parentRoute: typeof AgentRoute
     }
     '/agent/sub-agents': {
       id: '/agent/sub-agents'
@@ -486,6 +505,7 @@ interface AgentRouteChildren {
   AgentSettingsRoute: typeof AgentSettingsRoute
   AgentStoreRoute: typeof AgentStoreRoute
   AgentSubAgentsRoute: typeof AgentSubAgentsRoute
+  AgentWalletRoute: typeof AgentWalletRoute
   AgentIndexRoute: typeof AgentIndexRoute
 }
 
@@ -497,6 +517,7 @@ const AgentRouteChildren: AgentRouteChildren = {
   AgentSettingsRoute: AgentSettingsRoute,
   AgentStoreRoute: AgentStoreRoute,
   AgentSubAgentsRoute: AgentSubAgentsRoute,
+  AgentWalletRoute: AgentWalletRoute,
   AgentIndexRoute: AgentIndexRoute,
 }
 
