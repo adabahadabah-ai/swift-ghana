@@ -51,9 +51,6 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
-    scripts: [
-      { src: "https://js.paystack.co/v2/inline.js", attrs: { async: true } },
-    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -69,6 +66,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <script src="https://js.paystack.co/v1/inline.js" async></script>
       </body>
     </html>
   );
