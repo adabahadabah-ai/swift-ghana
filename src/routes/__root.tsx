@@ -66,6 +66,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <script src="https://js.paystack.co/v1/inline.js" async></script>
       </body>
     </html>
   );
