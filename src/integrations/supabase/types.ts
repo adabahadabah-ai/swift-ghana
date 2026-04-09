@@ -14,6 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
+      global_package_settings: {
+        Row: {
+          agent_price: number | null
+          id: string
+          is_unavailable: boolean
+          network: string
+          package_size: string
+          public_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          agent_price?: number | null
+          id?: string
+          is_unavailable?: boolean
+          network: string
+          package_size: string
+          public_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agent_price?: number | null
+          id?: string
+          is_unavailable?: boolean
+          network?: string
+          package_size?: string
+          public_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      maintenance_settings: {
+        Row: {
+          id: number
+          is_enabled: boolean
+          message: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          is_enabled?: boolean
+          message?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          is_enabled?: boolean
+          message?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_dismissals: {
+        Row: {
+          created_at: string
+          id: string
+          notification_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_dismissals_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          target_type: string
+          target_user_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          target_type?: string
+          target_user_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          target_type?: string
+          target_user_id?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          afa_date_of_birth: string | null
+          afa_email: string | null
+          afa_full_name: string | null
+          afa_ghana_card: string | null
+          afa_occupation: string | null
+          afa_residence: string | null
+          agent_id: string
+          amount: number
+          created_at: string
+          customer_phone: string | null
+          failure_reason: string | null
+          id: string
+          network: string | null
+          order_type: string
+          package_size: string | null
+          profit: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          afa_date_of_birth?: string | null
+          afa_email?: string | null
+          afa_full_name?: string | null
+          afa_ghana_card?: string | null
+          afa_occupation?: string | null
+          afa_residence?: string | null
+          agent_id?: string
+          amount?: number
+          created_at?: string
+          customer_phone?: string | null
+          failure_reason?: string | null
+          id?: string
+          network?: string | null
+          order_type?: string
+          package_size?: string | null
+          profit?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          afa_date_of_birth?: string | null
+          afa_email?: string | null
+          afa_full_name?: string | null
+          afa_ghana_card?: string | null
+          afa_occupation?: string | null
+          afa_residence?: string | null
+          agent_id?: string
+          amount?: number
+          created_at?: string
+          customer_phone?: string | null
+          failure_reason?: string | null
+          id?: string
+          network?: string | null
+          order_type?: string
+          package_size?: string | null
+          profit?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -41,6 +214,48 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          auto_api_switch: boolean
+          backup_provider: string
+          customer_service_number: string
+          dark_mode_enabled: boolean
+          disable_ordering: boolean
+          holiday_message: string
+          holiday_mode_enabled: boolean
+          id: number
+          preferred_provider: string
+          support_channel_link: string
+          updated_at: string
+        }
+        Insert: {
+          auto_api_switch?: boolean
+          backup_provider?: string
+          customer_service_number?: string
+          dark_mode_enabled?: boolean
+          disable_ordering?: boolean
+          holiday_message?: string
+          holiday_mode_enabled?: boolean
+          id?: number
+          preferred_provider?: string
+          support_channel_link?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_api_switch?: boolean
+          backup_provider?: string
+          customer_service_number?: string
+          dark_mode_enabled?: boolean
+          disable_ordering?: boolean
+          holiday_message?: string
+          holiday_mode_enabled?: boolean
+          id?: number
+          preferred_provider?: string
+          support_channel_link?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -49,7 +264,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
@@ -59,21 +274,76 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          agent_id: string
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          agent_id: string
+          amount: number
+          completed_at: string | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      generate_topup_reference: { Args: never; Returns: string }
       has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
+        Args: { p_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
     }
     Enums: {
-      app_role: "admin" | "agent" | "user"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -201,7 +471,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agent", "user"],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const
