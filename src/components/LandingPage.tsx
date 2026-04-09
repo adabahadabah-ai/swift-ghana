@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Zap, Shield, Users, ArrowRight, ChevronRight, Settings } from "lucide-react";
+import { Zap, Shield, Users, ArrowRight, ChevronRight, DollarSign, Globe, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import type { Network } from "@/lib/mock-data";
 
 function Navbar() {
@@ -159,46 +161,61 @@ function Benefits() {
   );
 }
 
-function BecomeAdmin() {
+function BecomeAgent() {
+  const agentBenefits = [
+    { icon: DollarSign, title: "Discounted Prices", desc: "Get up to 20% off regular data bundle prices" },
+    { icon: Globe, title: "Personal Mini Website", desc: "Get your own branded store to sell data bundles" },
+    { icon: Users, title: "Earn from Referrals", desc: "Recruit sub-agents and earn commission on their sales" },
+  ];
+
   return (
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4">
-            Become an <span className="gold-text">Admin</span>
+            Become an <span className="gold-text">Agent</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Manage pricing, users, agents, and orders from a powerful admin dashboard.
+            Start your data reselling business today. Enjoy discounted prices and earn from every sale.
           </p>
         </div>
 
-        <GlassCard variant="strong" className="max-w-2xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-6">
-            <Settings className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <h3 className="text-xl font-heading font-bold text-foreground mb-3">Full Control Dashboard</h3>
-          <p className="text-muted-foreground mb-6 leading-relaxed">
-            Set data prices per network, manage all orders and transactions, view revenue analytics, and control user and agent accounts — all from one place.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            {["Manage Prices", "View Orders", "Control Agents", "Revenue Reports"].map((feature) => (
-              <div key={feature} className="glass-card p-3 rounded-xl text-center">
-                <p className="text-xs font-medium text-foreground">{feature}</p>
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {agentBenefits.map((b, i) => (
+            <GlassCard key={i} hover className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-gold-muted flex items-center justify-center mx-auto mb-4">
+                <b.icon className="h-6 w-6 text-primary" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-lg font-heading font-semibold text-foreground mb-2">{b.title}</h3>
+              <p className="text-sm text-muted-foreground">{b.desc}</p>
+            </GlassCard>
+          ))}
+        </div>
+
+        <div className="text-center">
           <Button variant="hero" size="xl" asChild>
-            <Link to="/admin">
-              Go to Admin Dashboard <ArrowRight className="h-5 w-5" />
+            <Link to="/agent-signup">
+              Start Earning as an Agent <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>
-        </GlassCard>
+        </div>
       </div>
     </section>
   );
 }
 
 function Footer() {
+  const [settings, setSettings] = useState({
+    support_channel_link: "https://whatsapp.com/channel/0029Vb6Xwed60eBaztkH2B3m",
+    customer_service_number: "+233 560 042 269",
+  });
+
+  useEffect(() => {
+    supabase.from("system_settings").select("support_channel_link, customer_service_number").eq("id", 1).single().then(({ data }) => {
+      if (data) setSettings(data);
+    });
+  }, []);
+
   return (
     <footer className="border-t border-glass-border py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -229,8 +246,15 @@ function Footer() {
             <h4 className="font-heading font-semibold text-foreground mb-3 text-sm">Contact</h4>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>support@swiftdata.gh</p>
-              <p>+233 24 000 0000</p>
-              <p>Accra, Ghana</p>
+              <p>{settings.customer_service_number}</p>
+              <a
+                href={settings.support_channel_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 hover:text-primary transition-colors"
+              >
+                Join our channel <ExternalLink className="h-3 w-3" />
+              </a>
             </div>
           </div>
         </div>
@@ -251,7 +275,7 @@ export default function LandingPage() {
       <HeroSection />
       <HowItWorks />
       <Benefits />
-      <BecomeAdmin />
+      <BecomeAgent />
       <Footer />
     </div>
   );
