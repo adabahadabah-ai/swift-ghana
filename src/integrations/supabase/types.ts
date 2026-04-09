@@ -214,6 +214,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sub_agents: {
+        Row: {
+          created_at: string
+          id: string
+          parent_agent_id: string
+          referral_code: string | null
+          status: string
+          sub_agent_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_agent_id: string
+          referral_code?: string | null
+          status?: string
+          sub_agent_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_agent_id?: string
+          referral_code?: string | null
+          status?: string
+          sub_agent_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           auto_api_switch: boolean
@@ -271,6 +301,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          agent_id: string
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          paystack_reference: string | null
+          reference: string | null
+          type: string
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          paystack_reference?: string | null
+          reference?: string | null
+          type?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          paystack_reference?: string | null
+          reference?: string | null
+          type?: string
         }
         Relationships: []
       }
@@ -343,7 +406,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "agent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -471,7 +534,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "agent"],
     },
   },
 } as const
