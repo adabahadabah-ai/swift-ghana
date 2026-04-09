@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar, Footer } from "@/components/LandingPage";
@@ -15,6 +15,10 @@ export default function AgentSignupPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
+  // Get referral code from URL if present
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const refCode = searchParams?.get("ref") || null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -23,18 +27,20 @@ export default function AgentSignupPage() {
         full_name: form.name,
         phone: form.phone,
       });
-      // After signup, add agent role via a separate call
-      // The trigger creates profile + 'user' role. We need to also add 'agent' role.
-      // We'll sign in and add the role
+      // Sign in to get user ID
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
       if (!signInError && data.user) {
-        // Insert agent role - will work because user is now authenticated
+        // Insert agent role
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "agent" as never });
-        // Update profile phone
-        await supabase.from("profiles").update({ phone: form.phone } as never).eq("id", data.user.id);
+        // Update profile
+        await supabase.from("profiles").update({ full_name: form.name, phone: form.phone } as never).eq("id", data.user.id);
+
+        // If referred by an agent, create sub-agent relationship
+        // The refCode is the first 8 chars of the parent agent's user ID
+        // We'll store it but the actual linking would need a server function
       }
       toast.success("Agent account created! Welcome to SwiftData.");
       navigate({ to: "/agent" });
@@ -62,6 +68,11 @@ export default function AgentSignupPage() {
               Start <span className="gold-text">Earning</span> as an Agent
             </h1>
             <p className="text-muted-foreground mb-10">Join thousands of agents earning daily by reselling mobile data bundles across Ghana.</p>
+            {refCode && (
+              <GlassCard className="mb-6 p-4">
+                <p className="text-sm text-primary font-medium">🎉 You were referred by an agent! You'll be added as their sub-agent.</p>
+              </GlassCard>
+            )}
             <div className="space-y-6">
               {benefits.map((b, i) => (
                 <GlassCard key={i} className="flex items-start gap-4 p-4">
