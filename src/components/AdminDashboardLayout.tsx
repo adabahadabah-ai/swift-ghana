@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, DollarSign, FileText, Users, UserPlus,
-  Bell, Settings, Menu, X, LogOut, Shield
+  Bell, Settings, Menu, X, LogOut, Shield, ArrowDownToLine
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -13,6 +13,7 @@ const adminNav = [
   { label: "Orders", to: "/admin/orders", icon: FileText },
   { label: "Users", to: "/admin/users", icon: Users },
   { label: "Agents", to: "/admin/agents", icon: UserPlus },
+  { label: "Withdrawals", to: "/admin/withdrawals", icon: ArrowDownToLine },
   { label: "Notifications", to: "/admin/notifications", icon: Bell },
   { label: "Settings", to: "/admin/settings", icon: Settings },
 ];

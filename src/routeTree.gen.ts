@@ -18,14 +18,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StoreAgentIdRouteImport } from './routes/store.$agentId'
+import { Route as AgentWithdrawalsRouteImport } from './routes/agent.withdrawals'
 import { Route as AgentWalletRouteImport } from './routes/agent.wallet'
 import { Route as AgentSubAgentsRouteImport } from './routes/agent.sub-agents'
 import { Route as AgentStoreRouteImport } from './routes/agent.store'
 import { Route as AgentSettingsRouteImport } from './routes/agent.settings'
 import { Route as AgentOrdersRouteImport } from './routes/agent.orders'
+import { Route as AgentManageSubAgentsRouteImport } from './routes/agent.manage-sub-agents'
 import { Route as AgentEarningsRouteImport } from './routes/agent.earnings'
 import { Route as AgentCustomersRouteImport } from './routes/agent.customers'
 import { Route as AgentBuyRouteImport } from './routes/agent.buy'
+import { Route as AdminWithdrawalsRouteImport } from './routes/admin.withdrawals'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminPricesRouteImport } from './routes/admin.prices'
@@ -78,6 +81,11 @@ const StoreAgentIdRoute = StoreAgentIdRouteImport.update({
   path: '/store/$agentId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentWithdrawalsRoute = AgentWithdrawalsRouteImport.update({
+  id: '/withdrawals',
+  path: '/withdrawals',
+  getParentRoute: () => AgentRoute,
+} as any)
 const AgentWalletRoute = AgentWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -103,6 +111,11 @@ const AgentOrdersRoute = AgentOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AgentRoute,
 } as any)
+const AgentManageSubAgentsRoute = AgentManageSubAgentsRouteImport.update({
+  id: '/manage-sub-agents',
+  path: '/manage-sub-agents',
+  getParentRoute: () => AgentRoute,
+} as any)
 const AgentEarningsRoute = AgentEarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
@@ -117,6 +130,11 @@ const AgentBuyRoute = AgentBuyRouteImport.update({
   id: '/buy',
   path: '/buy',
   getParentRoute: () => AgentRoute,
+} as any)
+const AdminWithdrawalsRoute = AdminWithdrawalsRouteImport.update({
+  id: '/withdrawals',
+  path: '/withdrawals',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -162,14 +180,17 @@ export interface FileRoutesByFullPath {
   '/admin/prices': typeof AdminPricesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/manage-sub-agents': typeof AgentManageSubAgentsRoute
   '/agent/orders': typeof AgentOrdersRoute
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/agent/wallet': typeof AgentWalletRoute
+  '/agent/withdrawals': typeof AgentWithdrawalsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
@@ -185,14 +206,17 @@ export interface FileRoutesByTo {
   '/admin/prices': typeof AdminPricesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/manage-sub-agents': typeof AgentManageSubAgentsRoute
   '/agent/orders': typeof AgentOrdersRoute
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/agent/wallet': typeof AgentWalletRoute
+  '/agent/withdrawals': typeof AgentWithdrawalsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
@@ -211,14 +235,17 @@ export interface FileRoutesById {
   '/admin/prices': typeof AdminPricesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/agent/buy': typeof AgentBuyRoute
   '/agent/customers': typeof AgentCustomersRoute
   '/agent/earnings': typeof AgentEarningsRoute
+  '/agent/manage-sub-agents': typeof AgentManageSubAgentsRoute
   '/agent/orders': typeof AgentOrdersRoute
   '/agent/settings': typeof AgentSettingsRoute
   '/agent/store': typeof AgentStoreRoute
   '/agent/sub-agents': typeof AgentSubAgentsRoute
   '/agent/wallet': typeof AgentWalletRoute
+  '/agent/withdrawals': typeof AgentWithdrawalsRoute
   '/store/$agentId': typeof StoreAgentIdRoute
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
@@ -238,14 +265,17 @@ export interface FileRouteTypes {
     | '/admin/prices'
     | '/admin/settings'
     | '/admin/users'
+    | '/admin/withdrawals'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
+    | '/agent/manage-sub-agents'
     | '/agent/orders'
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
     | '/agent/wallet'
+    | '/agent/withdrawals'
     | '/store/$agentId'
     | '/admin/'
     | '/agent/'
@@ -261,14 +291,17 @@ export interface FileRouteTypes {
     | '/admin/prices'
     | '/admin/settings'
     | '/admin/users'
+    | '/admin/withdrawals'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
+    | '/agent/manage-sub-agents'
     | '/agent/orders'
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
     | '/agent/wallet'
+    | '/agent/withdrawals'
     | '/store/$agentId'
     | '/admin'
     | '/agent'
@@ -286,14 +319,17 @@ export interface FileRouteTypes {
     | '/admin/prices'
     | '/admin/settings'
     | '/admin/users'
+    | '/admin/withdrawals'
     | '/agent/buy'
     | '/agent/customers'
     | '/agent/earnings'
+    | '/agent/manage-sub-agents'
     | '/agent/orders'
     | '/agent/settings'
     | '/agent/store'
     | '/agent/sub-agents'
     | '/agent/wallet'
+    | '/agent/withdrawals'
     | '/store/$agentId'
     | '/admin/'
     | '/agent/'
@@ -374,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreAgentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/withdrawals': {
+      id: '/agent/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/agent/withdrawals'
+      preLoaderRoute: typeof AgentWithdrawalsRouteImport
+      parentRoute: typeof AgentRoute
+    }
     '/agent/wallet': {
       id: '/agent/wallet'
       path: '/wallet'
@@ -409,6 +452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentOrdersRouteImport
       parentRoute: typeof AgentRoute
     }
+    '/agent/manage-sub-agents': {
+      id: '/agent/manage-sub-agents'
+      path: '/manage-sub-agents'
+      fullPath: '/agent/manage-sub-agents'
+      preLoaderRoute: typeof AgentManageSubAgentsRouteImport
+      parentRoute: typeof AgentRoute
+    }
     '/agent/earnings': {
       id: '/agent/earnings'
       path: '/earnings'
@@ -429,6 +479,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/agent/buy'
       preLoaderRoute: typeof AgentBuyRouteImport
       parentRoute: typeof AgentRoute
+    }
+    '/admin/withdrawals': {
+      id: '/admin/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/admin/withdrawals'
+      preLoaderRoute: typeof AdminWithdrawalsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/users': {
       id: '/admin/users'
@@ -482,6 +539,7 @@ interface AdminRouteChildren {
   AdminPricesRoute: typeof AdminPricesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminWithdrawalsRoute: typeof AdminWithdrawalsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -492,6 +550,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPricesRoute: AdminPricesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminWithdrawalsRoute: AdminWithdrawalsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -501,11 +560,13 @@ interface AgentRouteChildren {
   AgentBuyRoute: typeof AgentBuyRoute
   AgentCustomersRoute: typeof AgentCustomersRoute
   AgentEarningsRoute: typeof AgentEarningsRoute
+  AgentManageSubAgentsRoute: typeof AgentManageSubAgentsRoute
   AgentOrdersRoute: typeof AgentOrdersRoute
   AgentSettingsRoute: typeof AgentSettingsRoute
   AgentStoreRoute: typeof AgentStoreRoute
   AgentSubAgentsRoute: typeof AgentSubAgentsRoute
   AgentWalletRoute: typeof AgentWalletRoute
+  AgentWithdrawalsRoute: typeof AgentWithdrawalsRoute
   AgentIndexRoute: typeof AgentIndexRoute
 }
 
@@ -513,11 +574,13 @@ const AgentRouteChildren: AgentRouteChildren = {
   AgentBuyRoute: AgentBuyRoute,
   AgentCustomersRoute: AgentCustomersRoute,
   AgentEarningsRoute: AgentEarningsRoute,
+  AgentManageSubAgentsRoute: AgentManageSubAgentsRoute,
   AgentOrdersRoute: AgentOrdersRoute,
   AgentSettingsRoute: AgentSettingsRoute,
   AgentStoreRoute: AgentStoreRoute,
   AgentSubAgentsRoute: AgentSubAgentsRoute,
   AgentWalletRoute: AgentWalletRoute,
+  AgentWithdrawalsRoute: AgentWithdrawalsRoute,
   AgentIndexRoute: AgentIndexRoute,
 }
 
