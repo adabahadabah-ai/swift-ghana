@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, ShoppingCart, FileText, Users, UserPlus,
-  DollarSign, Globe, Settings, Menu, X, LogOut, Wallet
+  DollarSign, Globe, Settings, Menu, X, LogOut, Wallet, ArrowDownToLine
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,8 +15,9 @@ const agentNav = [
   { label: "Wallet", to: "/agent/wallet", icon: Wallet },
   { label: "My Orders", to: "/agent/orders", icon: FileText },
   { label: "Customers", to: "/agent/customers", icon: Users },
-  { label: "Sub-Agents", to: "/agent/sub-agents", icon: UserPlus },
+  { label: "Sub-Agents", to: "/agent/manage-sub-agents", icon: UserPlus },
   { label: "Earnings", to: "/agent/earnings", icon: DollarSign },
+  { label: "Withdrawals", to: "/agent/withdrawals", icon: ArrowDownToLine },
   { label: "My Store", to: "/agent/store", icon: Globe },
   { label: "Settings", to: "/agent/settings", icon: Settings },
 ];
@@ -31,7 +32,7 @@ export default function AgentDashboardLayout() {
     return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
-  if (!isAuthenticated || !hasRole("agent")) {
+  if (!isAuthenticated || (!hasRole("agent") && !hasRole("admin"))) {
     navigate({ to: "/login" });
     return null;
   }

@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { SuccessModal } from "@/components/SuccessModal";
 import { supabase } from "@/integrations/supabase/client";
 import { dataBundles, type Network, type DataBundle } from "@/lib/mock-data";
-import { Zap, X } from "lucide-react";
+import { Zap, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { processDataOrder, processWalletPurchase } from "@/server/order.functions";
 
 interface BuyDataFlowProps {
   isAgent?: boolean;
@@ -16,6 +18,7 @@ interface BuyDataFlowProps {
   useWallet?: boolean;
   walletBalance?: number;
   onWalletPurchase?: (amount: number) => void;
+  agentId?: string;
 }
 
 interface DbPackage {
@@ -27,13 +30,17 @@ interface DbPackage {
   is_unavailable: boolean;
 }
 
-export default function BuyDataFlow({ isAgent = false, storeName, useWallet = false, walletBalance = 0, onWalletPurchase }: BuyDataFlowProps) {
+export default function BuyDataFlow({ isAgent = false, storeName, useWallet = false, walletBalance = 0, onWalletPurchase, agentId }: BuyDataFlowProps) {
   const [network, setNetwork] = useState<Network | null>(null);
   const [phone, setPhone] = useState("");
   const [selectedBundle, setSelectedBundle] = useState<DataBundle | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [dbPackages, setDbPackages] = useState<DbPackage[]>([]);
+
+  const processOrderFn = useServerFn(processDataOrder);
+  const processWalletFn = useServerFn(processWalletPurchase);
 
   useEffect(() => {
     supabase.from("global_package_settings").select("*").then(({ data }) => {
@@ -41,7 +48,6 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
     });
   }, []);
 
-  // Merge DB prices with mock data
   const getBundles = (): DataBundle[] => {
     if (!network) return [];
     const mockBundles = dataBundles.filter((b) => b.network === network);
@@ -76,21 +82,58 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
     setPhone("");
   };
 
-  const handleConfirmPurchase = () => {
+  // Parse size string to number (e.g., "5GB" -> 5)
+  const parseSizeGB = (size: string): number => {
+    const match = size.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 1;
+  };
+
+  // Map network name for the API
+  const mapNetworkForApi = (net: string): string => {
+    if (net === "AirtelTigo") return "AIRTELTIGO_ISHARE";
+    return net.toUpperCase();
+  };
+
+  const handleConfirmPurchase = async () => {
     if (!phone || phone.replace(/\s/g, "").length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
+    if (!selectedBundle) return;
 
-    if (useWallet && onWalletPurchase && selectedBundle) {
+    setProcessing(true);
+
+    if (useWallet && onWalletPurchase) {
       const cost = price(selectedBundle);
       if (walletBalance < cost) {
         toast.error("Insufficient wallet balance. Please top up.");
+        setProcessing(false);
         return;
       }
-      onWalletPurchase(cost);
-      setShowPhoneDialog(false);
-      setShowSuccess(true);
+
+      try {
+        const result = await processWalletFn({
+          data: {
+            phone: phone.replace(/\s/g, ""),
+            size: parseSizeGB(selectedBundle.size),
+            network: selectedBundle.network,
+            amount: cost,
+            agent_price: selectedBundle.agentPrice,
+            package_size: selectedBundle.size,
+          },
+        });
+
+        if (result.success) {
+          onWalletPurchase(cost);
+          setShowPhoneDialog(false);
+          setShowSuccess(true);
+        } else {
+          toast.error(result.error || "Data delivery failed");
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Purchase failed");
+      }
+      setProcessing(false);
       return;
     }
 
@@ -100,7 +143,7 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
 
   const handlePaystackPayment = () => {
     if (!selectedBundle) return;
-    const amount = price(selectedBundle) * 100; // Paystack uses pesewas
+    const amount = price(selectedBundle) * 100; // pesewas
 
     const handler = (window as any).PaystackPop?.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_placeholder",
@@ -112,25 +155,44 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
         network: selectedBundle.network,
         bundle: selectedBundle.size,
       },
-      callback: (response: { reference: string }) => {
-        console.log("Payment successful:", response.reference);
-        setShowPhoneDialog(false);
-        setShowSuccess(true);
+      callback: async (response: { reference: string }) => {
+        setProcessing(true);
+        try {
+          const result = await processOrderFn({
+            data: {
+              phone: phone.replace(/\s/g, ""),
+              size: parseSizeGB(selectedBundle.size),
+              network: mapNetworkForApi(selectedBundle.network),
+              amount_paid: price(selectedBundle),
+              agent_price: selectedBundle.agentPrice,
+              paystack_reference: response.reference,
+              package_size: selectedBundle.size,
+              agent_id: agentId,
+            },
+          });
+
+          if (result.success) {
+            setShowPhoneDialog(false);
+            setShowSuccess(true);
+          } else {
+            toast.error(result.error || "Data delivery failed. Your payment has been recorded.");
+          }
+        } catch (err: any) {
+          toast.error(err.message || "Order processing failed");
+        }
+        setProcessing(false);
       },
       onClose: () => {
         toast.info("Payment cancelled");
+        setProcessing(false);
       },
     });
 
     if (handler) {
       handler.openIframe();
     } else {
-      // Fallback: simulate payment if Paystack not loaded
-      toast.info("Processing payment...");
-      setTimeout(() => {
-        setShowPhoneDialog(false);
-        setShowSuccess(true);
-      }, 1500);
+      toast.error("Payment system not loaded. Please refresh the page.");
+      setProcessing(false);
     }
   };
 
@@ -166,7 +228,7 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
           </div>
         </div>
 
-        {/* Step 2: Bundle - clicking opens phone dialog */}
+        {/* Step 2: Bundle */}
         {network && (
           <div className="mb-10">
             <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">2. Choose Bundle</h2>
@@ -204,14 +266,16 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
       {/* Phone Number Dialog */}
       {showPhoneDialog && selectedBundle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setShowPhoneDialog(false)} />
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => !processing && setShowPhoneDialog(false)} />
           <div className="relative w-full max-w-md">
             <GlassCard variant="strong" className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-heading font-bold text-foreground">Complete Purchase</h3>
-                <button onClick={() => setShowPhoneDialog(false)} className="text-muted-foreground hover:text-foreground">
-                  <X className="h-5 w-5" />
-                </button>
+                {!processing && (
+                  <button onClick={() => setShowPhoneDialog(false)} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
               </div>
 
               <div className="glass-card p-4 rounded-xl mb-6">
@@ -235,6 +299,7 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
                   className="h-12 text-lg bg-glass border-glass-border backdrop-blur-md rounded-xl"
                   autoFocus
+                  disabled={processing}
                 />
               </div>
 
@@ -246,9 +311,12 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
                 </div>
               )}
 
-              <Button variant="hero" size="xl" className="w-full" onClick={handleConfirmPurchase}>
-                <Zap className="h-5 w-5" />
-                {useWallet ? "Pay from Wallet" : "Pay with Paystack"}
+              <Button variant="hero" size="xl" className="w-full" onClick={handleConfirmPurchase} disabled={processing}>
+                {processing ? (
+                  <><Loader2 className="h-5 w-5 animate-spin" /> Processing...</>
+                ) : (
+                  <><Zap className="h-5 w-5" /> {useWallet ? "Pay from Wallet" : "Pay with Paystack"}</>
+                )}
               </Button>
             </GlassCard>
           </div>

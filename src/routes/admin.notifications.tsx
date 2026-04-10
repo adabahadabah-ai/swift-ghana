@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Bell, Trash2, Loader2 } from "lucide-react";
+import { Send, Bell, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { sendNotification } from "@/server/admin.functions";
 
 export const Route = createFileRoute("/admin/notifications")({
   component: NotificationsPage,
@@ -18,6 +20,7 @@ function NotificationsPage() {
   const [sending, setSending] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const sendNotifFn = useServerFn(sendNotification);
 
   const fetchNotifications = async () => {
     const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(20);
@@ -33,18 +36,21 @@ function NotificationsPage() {
       return;
     }
     setSending(true);
-    // In production, this would use a server function with service_role
-    // For now, show success since only service_role can insert
-    toast.success(`Notification sent to ${target}!`);
-    setTitle("");
-    setMessage("");
+    try {
+      await sendNotifFn({ data: { title: title.trim(), message: message.trim(), target_type: target } });
+      toast.success(`Notification sent to ${target}!`);
+      setTitle("");
+      setMessage("");
+      fetchNotifications();
+    } catch (err) {
+      toast.error("Failed to send notification");
+    }
     setSending(false);
   };
 
   return (
     <div className="space-y-6 animate-fade-up max-w-3xl">
       <h2 className="text-2xl font-heading font-bold text-foreground">Notifications</h2>
-
       <GlassCard variant="strong">
         <h3 className="text-sm font-heading font-semibold text-foreground mb-4">Send Pop-up Notification</h3>
         <div className="space-y-4">
@@ -52,12 +58,7 @@ function NotificationsPage() {
             <label className="text-sm text-muted-foreground mb-1.5 block">Target Audience</label>
             <div className="flex gap-2">
               {(["all", "agents", "users"] as const).map((t) => (
-                <Button
-                  key={t}
-                  variant={target === t ? "gold" : "outline"}
-                  size="sm"
-                  onClick={() => setTarget(t)}
-                >
+                <Button key={t} variant={target === t ? "gold" : "outline"} size="sm" onClick={() => setTarget(t)}>
                   {t === "all" ? "Everyone" : t === "agents" ? "Agents Only" : "Users Only"}
                 </Button>
               ))}
@@ -65,29 +66,17 @@ function NotificationsPage() {
           </div>
           <div>
             <label className="text-sm text-muted-foreground mb-1.5 block">Title</label>
-            <Input
-              placeholder="Notification title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="h-11 bg-glass border-glass-border rounded-xl"
-            />
+            <Input placeholder="Notification title" value={title} onChange={(e) => setTitle(e.target.value)} className="h-11 bg-glass border-glass-border rounded-xl" />
           </div>
           <div>
             <label className="text-sm text-muted-foreground mb-1.5 block">Message</label>
-            <textarea
-              placeholder="Type your message here..."
-              rows={4}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full rounded-xl bg-glass border border-glass-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring backdrop-blur-md resize-none"
-            />
+            <textarea placeholder="Type your message here..." rows={4} value={message} onChange={(e) => setMessage(e.target.value)} className="w-full rounded-xl bg-glass border border-glass-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring backdrop-blur-md resize-none" />
           </div>
           <Button variant="gold" onClick={handleSend} disabled={sending}>
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="h-4 w-4" /> Send Notification</>}
           </Button>
         </div>
       </GlassCard>
-
       <GlassCard variant="strong">
         <h3 className="text-sm font-heading font-semibold text-foreground mb-4">Sent Notifications</h3>
         {loading ? (
@@ -98,9 +87,7 @@ function NotificationsPage() {
           <div className="space-y-3">
             {notifications.map((n) => (
               <div key={n.id} className="flex items-start gap-3 py-3 border-b border-glass-border/50 last:border-0">
-                <div className="p-2 rounded-lg bg-gold-muted shrink-0">
-                  <Bell className="h-4 w-4 text-primary" />
-                </div>
+                <div className="p-2 rounded-lg bg-gold-muted shrink-0"><Bell className="h-4 w-4 text-primary" /></div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">{n.title}</p>
                   <p className="text-xs text-muted-foreground">{n.message}</p>
