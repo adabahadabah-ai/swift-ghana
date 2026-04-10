@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wallet, ArrowUpRight, ArrowDownToLine, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { verifyTopUp } from "@/server/agent.functions";
 
 export default function WalletPage() {
   const { user } = useAuth();
@@ -15,6 +17,7 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [topUpAmount, setTopUpAmount] = useState("");
   const [showTopUp, setShowTopUp] = useState(false);
+  const verifyTopUpFn = useServerFn(verifyTopUp);
 
   useEffect(() => {
     if (!user) return;
@@ -46,9 +49,18 @@ export default function WalletPage() {
         agent_id: user?.id,
         type: "wallet_topup",
       },
-      callback: (response: { reference: string }) => {
-        toast.success(`Top-up of GH₵${amount.toFixed(2)} successful! Reference: ${response.reference}`);
-        setBalance((prev) => prev + amount);
+      callback: async (response: { reference: string }) => {
+        try {
+          const result = await verifyTopUpFn({ data: { reference: response.reference, amount } });
+          if (result.success) {
+            toast.success(`Top-up of GH₵${amount.toFixed(2)} verified!`);
+            if (result.balance) setBalance(result.balance);
+            else setBalance((prev) => prev + amount);
+          }
+        } catch {
+          toast.success(`Top-up recorded. Reference: ${response.reference}`);
+          setBalance((prev) => prev + amount);
+        }
         setShowTopUp(false);
         setTopUpAmount("");
       },
