@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_store_packages: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          network: string
+          package_size: string
+          selling_price: number
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          network: string
+          package_size: string
+          selling_price?: number
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          network?: string
+          package_size?: string
+          selling_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_stores: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          is_published: boolean
+          store_description: string
+          store_name: string
+          support_phone: string
+          updated_at: string
+          whatsapp_link: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          store_description?: string
+          store_name?: string
+          support_phone?: string
+          updated_at?: string
+          whatsapp_link?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          store_description?: string
+          store_name?: string
+          support_phone?: string
+          updated_at?: string
+          whatsapp_link?: string
+        }
+        Relationships: []
+      }
       global_package_settings: {
         Row: {
           agent_price: number | null
@@ -214,6 +280,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sub_agent_packages: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          network: string
+          package_size: string
+          sub_agent_price: number
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          network: string
+          package_size: string
+          sub_agent_price?: number
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          network?: string
+          package_size?: string
+          sub_agent_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sub_agents: {
         Row: {
           created_at: string
@@ -343,6 +439,7 @@ export type Database = {
           balance: number
           created_at: string
           id: string
+          total_profit: number
           updated_at: string
         }
         Insert: {
@@ -350,6 +447,7 @@ export type Database = {
           balance?: number
           created_at?: string
           id?: string
+          total_profit?: number
           updated_at?: string
         }
         Update: {
@@ -357,6 +455,7 @@ export type Database = {
           balance?: number
           created_at?: string
           id?: string
+          total_profit?: number
           updated_at?: string
         }
         Relationships: []
@@ -369,6 +468,9 @@ export type Database = {
           created_at: string
           failure_reason: string | null
           id: string
+          momo_name: string
+          momo_network: string
+          momo_number: string
           status: string
           updated_at: string
         }
@@ -379,6 +481,9 @@ export type Database = {
           created_at?: string
           failure_reason?: string | null
           id?: string
+          momo_name?: string
+          momo_network?: string
+          momo_number?: string
           status?: string
           updated_at?: string
         }
@@ -389,6 +494,9 @@ export type Database = {
           created_at?: string
           failure_reason?: string | null
           id?: string
+          momo_name?: string
+          momo_network?: string
+          momo_number?: string
           status?: string
           updated_at?: string
         }
