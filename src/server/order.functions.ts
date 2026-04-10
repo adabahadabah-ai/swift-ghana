@@ -12,7 +12,7 @@ export const processDataOrder = createServerFn({ method: "POST" })
     z.object({
       phone: z.string().min(10).max(15),
       size: z.number().min(1),
-      network: z.enum(["MTN", "TELECEL", "AIRTELTIGO_ISHARE"]),
+      network: z.string().min(1).max(50),
       amount_paid: z.number().min(0),
       agent_price: z.number().min(0),
       paystack_reference: z.string().max(255).optional(),
