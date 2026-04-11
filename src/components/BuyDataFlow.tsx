@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { SuccessModal } from "@/components/SuccessModal";
 import { supabase } from "@/integrations/supabase/client";
 import { dataBundles, type Network, type DataBundle } from "@/lib/mock-data";
-import { Zap, X, Loader2 } from "lucide-react";
+import { Zap, X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { processDataOrder, processWalletPurchase } from "@/server/order.functions";
@@ -82,13 +82,11 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
     setPhone("");
   };
 
-  // Parse size string to number (e.g., "5GB" -> 5)
   const parseSizeGB = (size: string): number => {
     const match = size.match(/(\d+)/);
     return match ? parseInt(match[1]) : 1;
   };
 
-  // Map network name for the API
   const mapNetworkForApi = (net: string): string => {
     if (net === "AirtelTigo") return "AIRTELTIGO_ISHARE";
     return net.toUpperCase();
@@ -137,13 +135,12 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
       return;
     }
 
-    // Paystack payment for non-wallet purchases
     handlePaystackPayment();
   };
 
   const handlePaystackPayment = () => {
     if (!selectedBundle) return;
-    const amount = price(selectedBundle) * 100; // pesewas
+    const amount = price(selectedBundle) * 100;
 
     const handler = (window as any).PaystackPop?.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_placeholder",
@@ -200,65 +197,73 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
     <div className="min-h-screen">
       {!storeName && !isAgent && <Navbar />}
 
-      <div className={`${!storeName && !isAgent ? "pt-24" : "pt-4"} pb-16 px-4 max-w-4xl mx-auto`}>
-        {storeName && (
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-heading font-bold text-foreground">{storeName}'s Store</h1>
-            <p className="text-xs text-muted-foreground mt-1">Powered by SwiftData Ghana</p>
-          </div>
-        )}
+      <div className={`${!storeName && !isAgent ? "pt-24" : "pt-4"} pb-16 px-4 max-w-4xl mx-auto relative`}>
+        {!storeName && !isAgent && <div className="absolute inset-0 bg-dot-grid opacity-15" />}
 
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-2">
-            {isAgent ? "Buy Data (Agent Prices)" : "Buy Data Bundle"}
-          </h1>
-          <p className="text-muted-foreground">Select your network and bundle below</p>
-          {useWallet && (
-            <p className="text-sm text-primary font-medium mt-2">Wallet Balance: GH₵{walletBalance.toFixed(2)}</p>
+        <div className="relative">
+          {storeName && (
+            <div className="text-center mb-8">
+              <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">{storeName}'s Store</h1>
+              <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">Powered by SwiftData Ghana</p>
+            </div>
           )}
-        </div>
 
-        {/* Step 1: Network */}
-        <div className="mb-10">
-          <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">1. Select Network</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n) => (
-              <NetworkCard key={n} network={n} selected={network === n} onClick={() => { setNetwork(n); setSelectedBundle(null); }} />
-            ))}
+          <div className="text-center mb-10">
+            <span className="section-label">{isAgent ? "Agent Pricing" : "Data Bundles"}</span>
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground mt-3 mb-2 tracking-tight">
+              {isAgent ? "Buy Data at Agent Prices" : "Buy Data Bundle"}
+            </h1>
+            <p className="text-sm text-muted-foreground">Select your network and bundle below</p>
+            {useWallet && (
+              <div className="chip mt-3">
+                <Sparkles className="h-3 w-3" />
+                Wallet: GH₵{walletBalance.toFixed(2)}
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Step 2: Bundle */}
-        {network && (
+          {/* Step 1: Network */}
           <div className="mb-10">
-            <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">2. Choose Bundle</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {bundles.map((b) => (
-                <GlassCard
-                  key={b.id}
-                  hover
-                  className="text-center cursor-pointer relative"
-                  onClick={() => handleBundleSelect(b)}
-                >
-                  {b.popular && (
-                    <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold gold-gradient text-primary-foreground">POPULAR</span>
-                  )}
-                  {b.cheapest && (
-                    <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[oklch(0.60_0.18_155)] text-foreground">BEST VALUE</span>
-                  )}
-                  <p className="text-2xl font-heading font-bold text-foreground">{b.size}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{b.validity}</p>
-                  <div className="mt-3">
-                    <span className="text-xl font-bold text-primary">GH₵{price(b).toFixed(2)}</span>
-                    {isAgent && (
-                      <span className="text-xs text-muted-foreground line-through ml-2">GH₵{b.regularPrice.toFixed(2)}</span>
-                    )}
-                  </div>
-                </GlassCard>
+            <h2 className="section-label mb-4">1. Select Network</h2>
+            <div className="grid grid-cols-3 gap-3">
+              {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n) => (
+                <NetworkCard key={n} network={n} selected={network === n} onClick={() => { setNetwork(n); setSelectedBundle(null); }} />
               ))}
             </div>
           </div>
-        )}
+
+          {/* Step 2: Bundle */}
+          {network && (
+            <div className="mb-10 animate-fade-up">
+              <h2 className="section-label mb-4">2. Choose Bundle</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {bundles.map((b) => (
+                  <GlassCard
+                    key={b.id}
+                    hover
+                    className="text-center cursor-pointer relative overflow-hidden group"
+                    onClick={() => handleBundleSelect(b)}
+                  >
+                    {b.popular && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[9px] font-bold gold-gradient-static text-primary-foreground uppercase tracking-wider">Popular</span>
+                    )}
+                    {b.cheapest && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[9px] font-bold bg-success/20 text-success border border-success/20 uppercase tracking-wider">Best</span>
+                    )}
+                    <p className="text-2xl font-heading font-bold text-foreground tracking-tight">{b.size}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{b.validity}</p>
+                    <div className="mt-3">
+                      <span className="text-lg font-bold text-primary">GH₵{price(b).toFixed(2)}</span>
+                      {isAgent && (
+                        <span className="text-[10px] text-muted-foreground line-through ml-2">GH₵{b.regularPrice.toFixed(2)}</span>
+                      )}
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {!storeName && !isAgent && <Footer />}
@@ -266,56 +271,57 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
       {/* Phone Number Dialog */}
       {showPhoneDialog && selectedBundle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => !processing && setShowPhoneDialog(false)} />
-          <div className="relative w-full max-w-md">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => !processing && setShowPhoneDialog(false)} />
+          <div className="relative w-full max-w-md animate-slide-up">
             <GlassCard variant="strong" className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-heading font-bold text-foreground">Complete Purchase</h3>
+                <h3 className="text-base font-heading font-bold text-foreground tracking-tight">Complete Purchase</h3>
                 {!processing && (
-                  <button onClick={() => setShowPhoneDialog(false)} className="text-muted-foreground hover:text-foreground">
-                    <X className="h-5 w-5" />
+                  <button onClick={() => setShowPhoneDialog(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <X className="h-4 w-4" />
                   </button>
                 )}
               </div>
 
-              <div className="glass-card p-4 rounded-xl mb-6">
+              <div className="glass-card p-4 rounded-lg mb-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Bundle</p>
-                    <p className="text-lg font-heading font-bold text-foreground">{selectedBundle.size} {selectedBundle.network}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Bundle</p>
+                    <p className="text-base font-heading font-bold text-foreground tracking-tight">{selectedBundle.size} {selectedBundle.network}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-2xl font-heading font-bold text-primary">GH₵{price(selectedBundle).toFixed(2)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Price</p>
+                    <p className="text-xl font-heading font-bold text-primary">GH₵{price(selectedBundle).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Recipient Phone Number</label>
+              <div className="mb-5">
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Recipient Phone</label>
                 <Input
                   placeholder="024 XXX XXXX"
                   value={phone}
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  className="h-12 text-lg bg-glass border-glass-border backdrop-blur-md rounded-xl"
+                  className="h-11 text-base bg-glass border-glass-border rounded-lg font-mono"
                   autoFocus
                   disabled={processing}
                 />
               </div>
 
               {phone && phone.replace(/\s/g, "").length >= 10 && (
-                <div className="glass-card p-4 rounded-xl mb-6">
-                  <p className="text-xs text-muted-foreground mb-1">Sending to</p>
-                  <p className="text-foreground font-medium">{phone}</p>
-                  <p className="text-xs text-muted-foreground">{selectedBundle.size} {selectedBundle.network} • GH₵{price(selectedBundle).toFixed(2)}</p>
+                <div className="glass-card p-3 rounded-lg mb-5 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    <span className="text-xs text-muted-foreground">Sending <span className="text-foreground font-medium">{selectedBundle.size} {selectedBundle.network}</span> to <span className="text-foreground font-mono">{phone}</span></span>
+                  </div>
                 </div>
               )}
 
-              <Button variant="hero" size="xl" className="w-full" onClick={handleConfirmPurchase} disabled={processing}>
+              <Button variant="hero" size="lg" className="w-full" onClick={handleConfirmPurchase} disabled={processing}>
                 {processing ? (
-                  <><Loader2 className="h-5 w-5 animate-spin" /> Processing...</>
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
                 ) : (
-                  <><Zap className="h-5 w-5" /> {useWallet ? "Pay from Wallet" : "Pay with Paystack"}</>
+                  <><Zap className="h-4 w-4" /> {useWallet ? "Pay from Wallet" : "Pay with Paystack"}</>
                 )}
               </Button>
             </GlassCard>

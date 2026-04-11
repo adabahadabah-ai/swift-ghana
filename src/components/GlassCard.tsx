@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "strong" | "gold";
+  variant?: "default" | "strong" | "gold" | "glow";
   hover?: boolean;
   float?: boolean;
 }
@@ -10,11 +10,12 @@ export function GlassCard({ className, variant = "default", hover, float, childr
   return (
     <div
       className={cn(
-        "rounded-2xl p-6 transition-all duration-300",
+        "rounded-xl p-6 transition-all duration-300",
         variant === "default" && "glass-card",
         variant === "strong" && "glass-card-strong",
-        variant === "gold" && "glass-card border-primary/30",
-        hover && "hover-glow hover:scale-[1.02] cursor-pointer",
+        variant === "gold" && "glass-card border-glow",
+        variant === "glow" && "glass-card-strong animate-border-glow",
+        hover && "hover-lift cursor-pointer",
         float && "animate-float",
         className
       )}
