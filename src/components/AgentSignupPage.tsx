@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar, Footer } from "@/components/LandingPage";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, DollarSign, Globe, ArrowRight, Loader2 } from "lucide-react";
+import { Users, DollarSign, Globe, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AgentSignupPage() {
@@ -15,7 +15,6 @@ export default function AgentSignupPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
-  // Get referral code from URL if present
   const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const refCode = searchParams?.get("ref") || null;
 
@@ -27,20 +26,13 @@ export default function AgentSignupPage() {
         full_name: form.name,
         phone: form.phone,
       });
-      // Sign in to get user ID
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
       if (!signInError && data.user) {
-        // Insert agent role
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "agent" as never });
-        // Update profile
         await supabase.from("profiles").update({ full_name: form.name, phone: form.phone } as never).eq("id", data.user.id);
-
-        // If referred by an agent, create sub-agent relationship
-        // The refCode is the first 8 chars of the parent agent's user ID
-        // We'll store it but the actual linking would need a server function
       }
       toast.success("Agent account created! Welcome to SwiftData.");
       navigate({ to: "/agent" });
@@ -54,64 +46,67 @@ export default function AgentSignupPage() {
 
   const benefits = [
     { icon: DollarSign, title: "Discounted Prices", desc: "Get up to 20% off regular data bundle prices" },
-    { icon: Globe, title: "Personal Mini Website", desc: "Get your own branded store to sell data bundles" },
-    { icon: Users, title: "Earn from Referrals", desc: "Recruit sub-agents and earn commission on their sales" },
+    { icon: Globe, title: "Personal Store", desc: "Get your own branded store to sell data bundles" },
+    { icon: Users, title: "Referral Earnings", desc: "Recruit sub-agents and earn commission on their sales" },
   ];
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="pt-24 pb-16 px-4 max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+      <div className="pt-24 pb-16 px-4 max-w-6xl mx-auto relative">
+        <div className="absolute inset-0 bg-dot-grid opacity-15" />
+        <div className="relative grid lg:grid-cols-2 gap-12 items-start">
           <div className="pt-8">
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4">
+            <span className="section-label">Join the Network</span>
+            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mt-3 mb-4 tracking-tight">
               Start <span className="gold-text">Earning</span> as an Agent
             </h1>
-            <p className="text-muted-foreground mb-10">Join thousands of agents earning daily by reselling mobile data bundles across Ghana.</p>
+            <p className="text-muted-foreground text-sm mb-10 leading-relaxed">Join thousands of agents earning daily by reselling mobile data bundles across Ghana.</p>
             {refCode && (
-              <GlassCard className="mb-6 p-4">
-                <p className="text-sm text-primary font-medium">🎉 You were referred by an agent! You'll be added as their sub-agent.</p>
-              </GlassCard>
+              <div className="chip mb-6">
+                <Sparkles className="h-3 w-3" />
+                You were referred by an agent! You'll be added as their sub-agent.
+              </div>
             )}
-            <div className="space-y-6">
+            <div className="space-y-3">
               {benefits.map((b, i) => (
-                <GlassCard key={i} className="flex items-start gap-4 p-4">
-                  <div className="p-2.5 rounded-xl bg-gold-muted shrink-0">
-                    <b.icon className="h-5 w-5 text-primary" />
+                <div key={i} className="flex items-start gap-3 glass-card p-4 rounded-xl group hover-lift">
+                  <div className="p-2 rounded-lg bg-gold-muted border border-primary/10 shrink-0 group-hover:border-primary/30 transition-colors">
+                    <b.icon className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-semibold text-foreground">{b.title}</h3>
-                    <p className="text-sm text-muted-foreground">{b.desc}</p>
+                    <h3 className="text-sm font-heading font-semibold text-foreground tracking-tight">{b.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{b.desc}</p>
                   </div>
-                </GlassCard>
+                </div>
               ))}
             </div>
           </div>
 
           <GlassCard variant="strong" className="p-8">
-            <h2 className="text-xl font-heading font-bold text-foreground mb-6">Create Agent Account</h2>
+            <h2 className="text-lg font-heading font-bold text-foreground mb-6 tracking-tight">Create Agent Account</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Full Name</label>
-                <Input placeholder="Kwame Asante" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 bg-glass border-glass-border rounded-xl" required />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Full Name</label>
+                <Input placeholder="Kwame Asante" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Phone Number</label>
-                <Input placeholder="024 XXX XXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-11 bg-glass border-glass-border rounded-xl" required />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Phone Number</label>
+                <Input placeholder="024 XXX XXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Email</label>
-                <Input type="email" placeholder="kwame@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-11 bg-glass border-glass-border rounded-xl" required />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Email</label>
+                <Input type="email" placeholder="kwame@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Password</label>
-                <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="h-11 bg-glass border-glass-border rounded-xl" required />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Password</label>
+                <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
               </div>
               <Button variant="hero" size="lg" className="w-full mt-2" type="submit" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start Earning as an Agent <ArrowRight className="h-4 w-4" /></>}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start Earning <ArrowRight className="h-4 w-4" /></>}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground text-center mt-6">
+            <p className="text-xs text-muted-foreground text-center mt-6">
               Already have an account?{" "}
               <a href="/login" className="text-primary hover:underline font-medium">Sign In</a>
             </p>
