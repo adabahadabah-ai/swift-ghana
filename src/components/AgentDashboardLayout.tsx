@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, ShoppingCart, FileText, Users, UserPlus,
   DollarSign, Globe, Settings, Menu, X, LogOut, Wallet, ArrowDownToLine, Zap
@@ -28,6 +27,12 @@ export default function AgentDashboardLayout() {
   const { signOut, loading, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && (!isAuthenticated || (!hasRole("agent") && !hasRole("admin")))) {
+      navigate({ to: "/login" });
+    }
+  }, [loading, isAuthenticated, hasRole, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -40,7 +45,6 @@ export default function AgentDashboardLayout() {
   }
 
   if (!isAuthenticated || (!hasRole("agent") && !hasRole("admin"))) {
-    navigate({ to: "/login" });
     return null;
   }
 
@@ -57,7 +61,6 @@ export default function AgentDashboardLayout() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={cn(
         "fixed lg:sticky top-0 left-0 z-50 h-screen w-60 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300",
         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -65,9 +68,9 @@ export default function AgentDashboardLayout() {
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg gold-gradient-static flex items-center justify-center">
-              <Zap className="h-3.5 w-3.5 text-primary-foreground" />
+              <Zap className="h-3.5 w-3.5 text-sidebar-primary-foreground" />
             </div>
-            <span className="font-heading font-bold text-sm text-sidebar-foreground tracking-tight">Swift<span className="gold-text">Data</span></span>
+            <span className="font-heading font-bold text-sm text-sidebar-foreground tracking-tight">Swift<span className="text-sidebar-primary">Data</span></span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-sidebar-foreground">
             <X className="h-4 w-4" />
@@ -85,7 +88,7 @@ export default function AgentDashboardLayout() {
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
                   isActive
-                    ? "bg-sidebar-accent text-primary border-l-2 border-primary"
+                    ? "bg-sidebar-accent text-sidebar-primary border-l-2 border-sidebar-primary"
                     : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                 )}
               >
@@ -107,7 +110,6 @@ export default function AgentDashboardLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-30 h-12 bg-background/80 backdrop-blur-xl border-b border-border flex items-center px-4 gap-3">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground">

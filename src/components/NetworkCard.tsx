@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
-import { Wifi, Radio, Smartphone } from "lucide-react";
+import { Wifi, Radio, Signal } from "lucide-react";
 import type { Network } from "@/lib/mock-data";
-
-const networkConfig: Record<Network, { color: string; borderColor: string; icon: typeof Wifi }> = {
-  MTN: { color: "oklch(0.87 0.17 90)", borderColor: "oklch(0.87 0.17 90 / 30%)", icon: Wifi },
-  AirtelTigo: { color: "oklch(0.65 0.22 25)", borderColor: "oklch(0.65 0.22 25 / 30%)", icon: Radio },
-  Telecel: { color: "oklch(0.65 0.20 155)", borderColor: "oklch(0.65 0.20 155 / 30%)", icon: Smartphone },
-};
 
 interface NetworkCardProps {
   network: Network;
@@ -15,30 +9,46 @@ interface NetworkCardProps {
   className?: string;
 }
 
+const networkConfig: Record<Network, { icon: typeof Wifi; color: string; selectedBg: string }> = {
+  MTN: {
+    icon: Wifi,
+    color: "text-[oklch(0.75_0.18_85)]",
+    selectedBg: "card-yellow",
+  },
+  AirtelTigo: {
+    icon: Radio,
+    color: "text-destructive",
+    selectedBg: "card-dark",
+  },
+  Telecel: {
+    icon: Signal,
+    color: "text-primary",
+    selectedBg: "glass-card-strong border-primary/30",
+  },
+};
+
 export function NetworkCard({ network, selected, onClick, className }: NetworkCardProps) {
   const config = networkConfig[network];
-  const IconComp = config.icon;
+  const Icon = config.icon;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "glass-card p-5 text-center transition-all duration-300 cursor-pointer group relative overflow-hidden",
-        selected && "ring-2 ring-primary scale-[1.02] border-glow",
-        !selected && "hover-lift",
+        "w-full rounded-xl p-4 text-center transition-all duration-300 hover-lift cursor-pointer border",
+        selected
+          ? `${config.selectedBg} ring-2 ring-primary/30`
+          : "glass-card hover:border-primary/20",
         className
       )}
     >
-      <div className="absolute inset-0 bg-radial-glow opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative">
-        <div
-          className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
-          style={{ background: `color-mix(in oklch, ${config.color} 15%, transparent)` }}
-        >
-          <IconComp className="h-5 w-5" style={{ color: config.color }} />
-        </div>
-        <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">{network}</h3>
+      <div className={cn(
+        "w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center transition-colors",
+        selected ? "bg-[oklch(0.15_0.02_260_/_10%)]" : "bg-gold-muted"
+      )}>
+        <Icon className={cn("h-5 w-5", config.color)} />
       </div>
+      <h3 className="text-sm font-heading font-bold tracking-tight">{network}</h3>
     </button>
   );
 }
