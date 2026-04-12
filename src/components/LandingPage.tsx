@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp, ChevronRight } from "lucide-react";
+import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +24,7 @@ function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass-card-strong border-b border-glass-border" : "bg-transparent"} rounded-none`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border shadow-sm" : "bg-transparent"} rounded-none`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg gold-gradient-static flex items-center justify-center">
@@ -56,11 +56,8 @@ function Navbar() {
 function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-      {/* Background layers */}
-      <div className="absolute inset-0 bg-dot-grid opacity-40" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-radial-glow opacity-60" />
-      <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] rounded-full blur-[140px]" style={{ background: "oklch(0.87 0.17 90 / 6%)" }} />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full blur-[120px]" style={{ background: "oklch(0.87 0.17 90 / 4%)" }} />
+      <div className="absolute inset-0 bg-dot-grid opacity-30" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-radial-glow opacity-40" />
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
@@ -94,12 +91,12 @@ function HeroSection() {
           </Button>
         </div>
 
-        {/* Network selector */}
+        {/* Network cards */}
         <div className="animate-fade-up grid grid-cols-3 gap-3 sm:gap-4 max-w-sm mx-auto mt-20" style={{ animationDelay: "0.65s", animationFillMode: "both" }}>
-          {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n) => (
+          {(["MTN", "AirtelTigo", "Telecel"] as Network[]).map((n, i) => (
             <Link key={n} to="/buy">
-              <GlassCard hover className="text-center py-4 px-3">
-                <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">{n}</h3>
+              <GlassCard variant={i === 0 ? "yellow" : i === 1 ? "dark" : "default"} hover className="text-center py-4 px-3">
+                <h3 className="text-sm font-heading font-bold tracking-tight">{n}</h3>
               </GlassCard>
             </Link>
           ))}
@@ -132,7 +129,7 @@ function HowItWorks() {
 
   return (
     <section className="py-28 relative">
-      <div className="absolute inset-0 bg-dot-grid opacity-20" />
+      <div className="absolute inset-0 bg-dot-grid opacity-15" />
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="section-label">How it works</span>
@@ -143,20 +140,19 @@ function HowItWorks() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 relative">
-          {/* Connector line */}
           <div className="hidden md:block absolute top-1/2 left-[16%] right-[16%] h-px border-t border-dashed border-primary/20" />
 
           {steps.map((step, i) => (
-            <GlassCard key={i} hover className="text-center relative group">
+            <GlassCard key={i} variant={i === 1 ? "yellow" : "strong"} hover className="text-center relative group">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full gold-gradient-static flex items-center justify-center text-[10px] font-bold text-primary-foreground z-10">
                 {i + 1}
               </div>
               <div className="pt-4">
-                <div className="w-14 h-14 rounded-xl bg-gold-muted border border-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:border-primary/30 transition-colors">
-                  <step.icon className="h-6 w-6 text-primary" />
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors ${i === 1 ? "bg-[oklch(0.15_0.02_260_/_10%)]" : "bg-gold-muted border border-primary/10 group-hover:border-primary/30"}`}>
+                  <step.icon className={`h-6 w-6 ${i === 1 ? "text-[oklch(0.15_0.02_260)]" : "text-primary"}`} />
                 </div>
-                <h3 className="text-base font-heading font-semibold text-foreground mb-2 tracking-tight">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.desc}</p>
+                <h3 className="text-base font-heading font-semibold mb-2 tracking-tight">{step.title}</h3>
+                <p className="text-sm opacity-70">{step.desc}</p>
               </div>
             </GlassCard>
           ))}
@@ -175,7 +171,6 @@ function Benefits() {
 
   return (
     <section className="py-28 relative">
-      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, oklch(0.87 0.17 90 / 2%) 0%, transparent 100%)" }} />
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="section-label">Why SwiftData</span>
@@ -186,15 +181,17 @@ function Benefits() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {benefits.map((b, i) => (
-            <GlassCard key={i} variant="strong" hover className="group relative overflow-hidden">
+            <GlassCard key={i} variant={i === 0 ? "dark" : i === 1 ? "yellow" : "strong"} hover className="group relative overflow-hidden">
               <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="chip m-3 text-[10px]">{b.badge}</div>
               </div>
-              <div className="w-11 h-11 rounded-lg bg-gold-muted border border-primary/10 flex items-center justify-center mb-5 group-hover:border-primary/30 transition-colors">
-                <b.icon className="h-5 w-5 text-primary" />
+              <div className={`w-11 h-11 rounded-lg flex items-center justify-center mb-5 transition-colors ${
+                i === 0 ? "bg-[oklch(0.95_0_0_/_10%)]" : i === 1 ? "bg-[oklch(0.15_0.02_260_/_10%)]" : "bg-gold-muted border border-primary/10 group-hover:border-primary/30"
+              }`}>
+                <b.icon className={`h-5 w-5 ${i === 0 ? "text-[oklch(0.75_0.18_85)]" : i === 1 ? "text-[oklch(0.15_0.02_260)]" : "text-primary"}`} />
               </div>
-              <h3 className="text-base font-heading font-semibold text-foreground mb-2 tracking-tight">{b.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
+              <h3 className="text-base font-heading font-semibold mb-2 tracking-tight">{b.title}</h3>
+              <p className="text-sm opacity-70 leading-relaxed">{b.desc}</p>
             </GlassCard>
           ))}
         </div>
@@ -212,19 +209,18 @@ function BecomeAgent() {
 
   return (
     <section className="py-28 relative">
-      <div className="absolute inset-0 bg-dot-grid opacity-15" />
+      <div className="absolute inset-0 bg-dot-grid opacity-10" />
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-card-strong p-8 sm:p-12 lg:p-16 relative overflow-hidden">
-          {/* Glow accent */}
-          <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full blur-[100px]" style={{ background: "oklch(0.87 0.17 90 / 8%)" }} />
+        <div className="card-dark p-8 sm:p-12 lg:p-16 relative overflow-hidden rounded-2xl">
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full blur-[100px]" style={{ background: "oklch(0.75 0.18 85 / 10%)" }} />
 
           <div className="relative grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="section-label">For Entrepreneurs</span>
-              <h2 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mt-3 mb-4 tracking-tight">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[oklch(0.75_0.18_85)]">For Entrepreneurs</span>
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold text-[oklch(0.95_0_0)] mt-3 mb-4 tracking-tight">
                 Become an <span className="gold-text">Agent</span>
               </h2>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-[oklch(0.65_0_0)] mb-8 leading-relaxed">
                 Start your data reselling business today. Enjoy discounted prices, earn from every sale, and build your own brand.
               </p>
               <Button variant="hero" size="lg" asChild>
@@ -236,13 +232,13 @@ function BecomeAgent() {
 
             <div className="space-y-4">
               {agentBenefits.map((b, i) => (
-                <div key={i} className="flex items-start gap-4 glass-card p-4 rounded-xl group hover-lift cursor-default">
-                  <div className="p-2 rounded-lg bg-gold-muted border border-primary/10 shrink-0 group-hover:border-primary/30 transition-colors">
-                    <b.icon className="h-4 w-4 text-primary" />
+                <div key={i} className="flex items-start gap-4 bg-[oklch(0.20_0.02_260)] p-4 rounded-xl border border-[oklch(0.30_0.01_260)] group hover-lift cursor-default">
+                  <div className="p-2 rounded-lg bg-[oklch(0.75_0.18_85_/_10%)] border border-[oklch(0.75_0.18_85_/_20%)] shrink-0">
+                    <b.icon className="h-4 w-4 text-[oklch(0.75_0.18_85)]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-heading font-semibold text-foreground tracking-tight">{b.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{b.desc}</p>
+                    <h3 className="text-sm font-heading font-semibold text-[oklch(0.95_0_0)] tracking-tight">{b.title}</h3>
+                    <p className="text-xs text-[oklch(0.60_0_0)] mt-0.5">{b.desc}</p>
                   </div>
                 </div>
               ))}
@@ -267,7 +263,7 @@ function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-glass-border py-12">
+    <footer className="border-t border-border py-12 bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
@@ -310,7 +306,7 @@ function Footer() {
             </div>
           </div>
         </div>
-        <div className="border-t border-glass-border mt-10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="border-t border-border mt-10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">© 2026 SwiftData Ghana. All rights reserved.</p>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -326,7 +322,7 @@ export { Navbar, Footer };
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
       <HowItWorks />

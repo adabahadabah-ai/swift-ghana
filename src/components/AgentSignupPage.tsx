@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar, Footer } from "@/components/LandingPage";
@@ -51,10 +51,10 @@ export default function AgentSignupPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 px-4 max-w-6xl mx-auto relative">
-        <div className="absolute inset-0 bg-dot-grid opacity-15" />
+        <div className="absolute inset-0 bg-dot-grid opacity-10" />
         <div className="relative grid lg:grid-cols-2 gap-12 items-start">
           <div className="pt-8">
             <span className="section-label">Join the Network</span>
@@ -70,13 +70,15 @@ export default function AgentSignupPage() {
             )}
             <div className="space-y-3">
               {benefits.map((b, i) => (
-                <div key={i} className="flex items-start gap-3 glass-card p-4 rounded-xl group hover-lift">
-                  <div className="p-2 rounded-lg bg-gold-muted border border-primary/10 shrink-0 group-hover:border-primary/30 transition-colors">
-                    <b.icon className="h-4 w-4 text-primary" />
+                <div key={i} className={`flex items-start gap-3 p-4 rounded-xl group hover-lift ${i === 0 ? "card-yellow" : i === 1 ? "card-dark" : "glass-card"}`}>
+                  <div className={`p-2 rounded-lg shrink-0 transition-colors ${
+                    i === 0 ? "bg-[oklch(0.15_0.02_260_/_10%)]" : i === 1 ? "bg-[oklch(0.75_0.18_85_/_10%)] border border-[oklch(0.75_0.18_85_/_20%)]" : "bg-gold-muted border border-primary/10 group-hover:border-primary/30"
+                  }`}>
+                    <b.icon className={`h-4 w-4 ${i === 0 ? "text-[oklch(0.15_0.02_260)]" : i === 1 ? "text-[oklch(0.75_0.18_85)]" : "text-primary"}`} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-heading font-semibold text-foreground tracking-tight">{b.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{b.desc}</p>
+                    <h3 className="text-sm font-heading font-semibold tracking-tight">{b.title}</h3>
+                    <p className="text-xs mt-0.5 opacity-70">{b.desc}</p>
                   </div>
                 </div>
               ))}
@@ -88,19 +90,19 @@ export default function AgentSignupPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Full Name</label>
-                <Input placeholder="Kwame Asante" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
+                <Input placeholder="Kwame Asante" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-10 bg-input border-border rounded-lg text-sm" required />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Phone Number</label>
-                <Input placeholder="024 XXX XXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
+                <Input placeholder="024 XXX XXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-10 bg-input border-border rounded-lg text-sm" required />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Email</label>
-                <Input type="email" placeholder="kwame@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
+                <Input type="email" placeholder="kwame@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="h-10 bg-input border-border rounded-lg text-sm" required />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block uppercase tracking-wider">Password</label>
-                <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="h-10 bg-glass border-glass-border rounded-lg text-sm" required />
+                <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="h-10 bg-input border-border rounded-lg text-sm" required />
               </div>
               <Button variant="hero" size="lg" className="w-full mt-2" type="submit" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start Earning <ArrowRight className="h-4 w-4" /></>}
@@ -108,7 +110,9 @@ export default function AgentSignupPage() {
             </form>
             <p className="text-xs text-muted-foreground text-center mt-6">
               Already have an account?{" "}
-              <a href="/login" className="text-primary hover:underline font-medium">Sign In</a>
+              <Link to="/login" className="text-primary hover:underline font-medium">
+                Sign In
+              </Link>
             </p>
           </GlassCard>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, DollarSign, FileText, Users, UserPlus,
@@ -24,6 +24,12 @@ export default function AdminDashboardLayout() {
   const { signOut, loading, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && (!isAuthenticated || !hasRole("admin"))) {
+      navigate({ to: "/login" });
+    }
+  }, [loading, isAuthenticated, hasRole, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -36,7 +42,6 @@ export default function AdminDashboardLayout() {
   }
 
   if (!isAuthenticated || !hasRole("admin")) {
-    navigate({ to: "/login" });
     return null;
   }
 
@@ -78,7 +83,7 @@ export default function AdminDashboardLayout() {
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
                   isActive
-                    ? "bg-sidebar-accent text-primary border-l-2 border-primary"
+                    ? "bg-sidebar-accent text-sidebar-primary border-l-2 border-sidebar-primary"
                     : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                 )}
               >

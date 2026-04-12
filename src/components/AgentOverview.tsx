@@ -14,10 +14,10 @@ export default function AgentOverview() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatsCard title="Total Sales" value="GH₵12,450" icon={ShoppingCart} change="12% this week" positive />
-        <StatsCard title="Wallet" value="GH₵2,340" icon={Wallet} />
+        <StatsCard title="Total Sales" value="GH₵12,450" icon={ShoppingCart} change="12% this week" positive variant="yellow" />
+        <StatsCard title="Wallet" value="GH₵2,340" icon={Wallet} variant="dark" />
         <StatsCard title="Orders" value="342" icon={FileText} change="8% this week" positive />
-        <StatsCard title="Sub-Agents" value="5" icon={UserPlus} />
+        <StatsCard title="Sub-Agents" value="5" icon={UserPlus} variant="yellow" />
       </div>
 
       {/* Chart */}
@@ -31,24 +31,24 @@ export default function AgentOverview() {
             <AreaChart data={salesData}>
               <defs>
                 <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.87 0.17 90)" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="oklch(0.87 0.17 90)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="oklch(0.75 0.18 85)" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="oklch(0.75 0.18 85)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.30 0.01 260 / 20%)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.85 0.01 260 / 40%)" vertical={false} />
               <XAxis dataKey="month" stroke="oklch(0.50 0.02 260)" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="oklch(0.50 0.02 260)" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{
-                  background: "oklch(0.12 0.015 260 / 95%)",
-                  border: "1px solid oklch(0.40 0.01 260 / 30%)",
+                  background: "oklch(0.99 0 0 / 95%)",
+                  border: "1px solid oklch(0.85 0.01 260 / 50%)",
                   borderRadius: "8px",
-                  color: "white",
+                  color: "oklch(0.15 0.01 260)",
                   fontSize: "12px",
                   backdropFilter: "blur(20px)",
                 }}
               />
-              <Area type="monotone" dataKey="sales" stroke="oklch(0.87 0.17 90)" fill="url(#goldGrad)" strokeWidth={2} dot={false} />
+              <Area type="monotone" dataKey="sales" stroke="oklch(0.75 0.18 85)" fill="url(#goldGrad)" strokeWidth={2} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -60,7 +60,7 @@ export default function AgentOverview() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-muted-foreground border-b border-glass-border">
+              <tr className="text-muted-foreground border-b border-border">
                 <th className="text-left py-2.5 px-2 font-medium uppercase tracking-wider">Order</th>
                 <th className="text-left py-2.5 px-2 font-medium uppercase tracking-wider">Phone</th>
                 <th className="text-left py-2.5 px-2 font-medium uppercase tracking-wider hidden sm:table-cell">Network</th>
@@ -71,7 +71,7 @@ export default function AgentOverview() {
             </thead>
             <tbody>
               {recentOrders.slice(0, 5).map((o) => (
-                <tr key={o.id} className="border-b border-glass-border/30 hover:bg-accent/5 transition-colors">
+                <tr key={o.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
                   <td className="py-2.5 px-2 font-mono text-foreground">{o.id}</td>
                   <td className="py-2.5 px-2 text-muted-foreground">{o.phone}</td>
                   <td className="py-2.5 px-2 text-muted-foreground hidden sm:table-cell">{o.network}</td>

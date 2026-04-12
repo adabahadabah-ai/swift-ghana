@@ -37,11 +37,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 px-4 flex items-center justify-center min-h-[80vh] relative">
-        <div className="absolute inset-0 bg-dot-grid opacity-20" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-radial-glow opacity-50" />
+        <div className="absolute inset-0 bg-dot-grid opacity-15" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-radial-glow opacity-30" />
 
         <GlassCard variant="strong" className="relative p-8 w-full max-w-md">
           <div className="flex items-center gap-2.5 mb-6">
@@ -62,7 +62,7 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-10 bg-glass border-glass-border rounded-lg text-sm"
+                className="h-10 bg-input border-border rounded-lg text-sm"
                 required
               />
             </div>
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-10 bg-glass border-glass-border rounded-lg text-sm"
+                className="h-10 bg-input border-border rounded-lg text-sm"
                 required
               />
             </div>
