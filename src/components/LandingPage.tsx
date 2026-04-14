@@ -50,8 +50,11 @@ function Navbar() {
             <Link to="/agent-signup" className="text-muted-foreground hover:text-foreground transition-colors">Become Agent</Link>
           )}
           {hasRole("admin") && (
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-1">
-              <Shield className="h-3.5 w-3.5" /> Admin
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20 transition-colors font-medium text-xs"
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin Dashboard
             </Link>
           )}
           {isAuthenticated && !hasRole("admin") && (
@@ -350,15 +353,6 @@ function Footer() {
 export { Navbar, Footer };
 
 export default function LandingPage() {
-  const { loading, hasRole } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (loading) return;
-    if (hasRole("admin")) navigate("/admin", { replace: true });
-    else if (hasRole("agent")) navigate("/agent", { replace: true });
-  }, [loading, hasRole, navigate]);
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
