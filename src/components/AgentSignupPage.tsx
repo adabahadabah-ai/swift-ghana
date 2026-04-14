@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar, Footer } from "@/components/LandingPage";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export default function AgentSignupPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signIn, refreshRoles } = useAuth();
   const navigate = useNavigate();
 
   const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
@@ -26,16 +26,26 @@ export default function AgentSignupPage() {
         full_name: form.name,
         phone: form.phone,
       });
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.password,
-      });
-      if (!signInError && data.user) {
-        await supabase.from("user_roles").insert({ user_id: data.user.id, role: "agent" as never });
-        await supabase.from("profiles").update({ full_name: form.name, phone: form.phone } as never).eq("id", data.user.id);
+      await signIn(form.email, form.password);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Could not sign in after signup");
+
+      const { error: agentRoleError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: user.id, role: "agent" });
+      if (agentRoleError && agentRoleError.code !== "23505") {
+        throw new Error(agentRoleError.message);
       }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ full_name: form.name, phone: form.phone })
+        .eq("id", user.id);
+      if (profileError) throw new Error(profileError.message);
+
+      await refreshRoles();
       toast.success("Agent account created! Welcome to SwiftData.");
-      navigate({ to: "/agent" });
+      navigate("/agent");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Signup failed";
       toast.error(message);

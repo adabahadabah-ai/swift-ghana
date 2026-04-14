@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, DollarSign, FileText, Users, UserPlus,
   Bell, Settings, Menu, X, LogOut, Shield, ArrowDownToLine
@@ -47,7 +47,7 @@ export default function AdminDashboardLayout() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate({ to: "/" });
+    navigate("/");
   };
 
   return (

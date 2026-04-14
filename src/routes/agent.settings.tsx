@@ -1,14 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/agent/settings")({
-  component: SettingsPage,
-});
-
-function SettingsPage() {
+export default function SettingsPage() {
   return (
     <div className="space-y-6 animate-fade-up max-w-2xl">
       <h2 className="text-2xl font-heading font-bold text-foreground">Settings</h2>

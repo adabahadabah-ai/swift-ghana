@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -6,19 +5,12 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { confirmWithdrawal } from "@/server/admin.functions";
+import { apiPost } from "@/lib/api";
 
-export const Route = createFileRoute("/admin/withdrawals")({
-  component: AdminWithdrawalsPage,
-});
-
-function AdminWithdrawalsPage() {
+export default function AdminWithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState<string | null>(null);
-  const confirmFn = useServerFn(confirmWithdrawal);
-
   const fetchWithdrawals = async () => {
     // Admin can view all withdrawals via RLS
     const { data } = await supabase
@@ -55,7 +47,7 @@ function AdminWithdrawalsPage() {
   const handleConfirm = async (id: string) => {
     setConfirming(id);
     try {
-      await confirmFn({ data: { withdrawal_id: id } });
+      await apiPost("/api/admin/confirm-withdrawal", { withdrawal_id: id });
       toast.success("Withdrawal confirmed and profit deducted!");
       fetchWithdrawals();
     } catch (err: any) {

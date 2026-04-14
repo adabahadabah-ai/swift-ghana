@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -6,14 +5,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { updateSystemSettings } from "@/server/admin.functions";
+import { apiPost } from "@/lib/api";
 
-export const Route = createFileRoute("/admin/settings")({
-  component: AdminSettingsPage,
-});
-
-function AdminSettingsPage() {
+export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
@@ -24,8 +18,6 @@ function AdminSettingsPage() {
     holiday_message: "",
     disable_ordering: false,
   });
-  const updateSettingsFn = useServerFn(updateSystemSettings);
-
   useEffect(() => {
     supabase.from("system_settings").select("*").eq("id", 1).single().then(({ data }) => {
       if (data) {
@@ -45,14 +37,12 @@ function AdminSettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateSettingsFn({
-        data: {
-          customer_service_number: settings.customer_service_number,
-          support_channel_link: settings.support_channel_link,
-          holiday_mode_enabled: settings.holiday_mode_enabled,
-          holiday_message: settings.holiday_message,
-          disable_ordering: settings.disable_ordering,
-        },
+      await apiPost("/api/admin/update-system-settings", {
+        customer_service_number: settings.customer_service_number,
+        support_channel_link: settings.support_channel_link,
+        holiday_mode_enabled: settings.holiday_mode_enabled,
+        holiday_message: settings.holiday_message,
+        disable_ordering: settings.disable_ordering,
       });
       toast.success("Settings saved!");
     } catch (err) {

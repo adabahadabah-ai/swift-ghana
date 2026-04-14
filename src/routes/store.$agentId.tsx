@@ -1,13 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useParams } from "react-router-dom";
 import BuyDataFlow from "@/components/BuyDataFlow";
 
-export const Route = createFileRoute("/store/$agentId")({
-  component: AgentMiniStore,
-});
-
-function AgentMiniStore() {
-  const { agentId } = Route.useParams();
-  const agentName = agentId.charAt(0).toUpperCase() + agentId.slice(1).replace(/-/g, " ");
+export default function StoreAgentPage() {
+  const { agentId } = useParams<{ agentId: string }>();
+  const id = agentId ?? "";
+  const agentName = id ? id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, " ") : "Agent";
 
   return (
     <div className="min-h-screen">

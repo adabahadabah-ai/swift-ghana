@@ -1,13 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { GlassCard } from "@/components/GlassCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { recentOrders } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/admin/orders")({
-  component: AdminOrdersPage,
-});
-
-function AdminOrdersPage() {
+export default function AdminOrdersPage() {
   return (
     <div className="space-y-6 animate-fade-up">
       <h2 className="text-2xl font-heading font-bold text-foreground">Orders</h2>

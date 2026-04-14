@@ -1,11 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { GlassCard } from "@/components/GlassCard";
 
-export const Route = createFileRoute("/agent/customers")({
-  component: CustomersPage,
-});
-
-function CustomersPage() {
+export default function CustomersPage() {
   const customers = [
     { name: "Kwame Asante", phone: "024 555 1234", orders: 12, lastOrder: "Apr 7" },
     { name: "Ama Serwaa", phone: "027 888 5678", orders: 8, lastOrder: "Apr 6" },

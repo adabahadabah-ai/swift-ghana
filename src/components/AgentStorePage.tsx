@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { dataBundles, type Network } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Loader2, Globe, Copy, ExternalLink, Save, Eye } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { updateAgentStore } from "@/server/agent.functions";
+import { apiPost } from "@/lib/api";
 
 interface StorePackage {
   network: string;
@@ -42,7 +41,6 @@ export default function AgentStorePage() {
   const [globalPackages, setGlobalPackages] = useState<DbGlobalPackage[]>([]);
   const [localPrices, setLocalPrices] = useState<Record<string, string>>({});
 
-  const updateStoreFn = useServerFn(updateAgentStore);
 
   useEffect(() => {
     if (!user) return;
@@ -96,7 +94,7 @@ export default function AgentStorePage() {
     }
     setSaving(true);
     try {
-      await updateStoreFn({ data: store });
+      await apiPost("/api/agent/update-store", store);
       toast.success("Store settings saved!");
     } catch (err) {
       toast.error("Failed to save store settings");

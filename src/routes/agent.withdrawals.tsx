@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,14 +8,9 @@ import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DollarSign, ArrowDownToLine, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { requestWithdrawal } from "@/server/agent.functions";
+import { apiPost } from "@/lib/api";
 
-export const Route = createFileRoute("/agent/withdrawals")({
-  component: WithdrawalsPage,
-});
-
-function WithdrawalsPage() {
+export default function WithdrawalsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -76,13 +70,11 @@ function WithdrawalsPage() {
 
     setSubmitting(true);
     try {
-      await requestWithdrawalFn({
-        data: {
-          amount,
-          momo_number: form.momo_number.replace(/\s/g, ""),
-          momo_network: form.momo_network as "MTN" | "AirtelTigo" | "Telecel",
-          momo_name: form.momo_name.trim(),
-        },
+      await apiPost("/api/agent/request-withdrawal", {
+        amount,
+        momo_number: form.momo_number.replace(/\s/g, ""),
+        momo_network: form.momo_network as "MTN" | "AirtelTigo" | "Telecel",
+        momo_name: form.momo_name.trim(),
       });
       toast.success("Withdrawal request submitted! Please allow up to 24 hours.");
       setShowForm(false);

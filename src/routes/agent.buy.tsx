@@ -1,15 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import BuyDataFlow from "@/components/BuyDataFlow";
 import { Loader2 } from "lucide-react";
 
-export const Route = createFileRoute("/agent/buy")({
-  component: AgentBuyPage,
-});
-
-function AgentBuyPage() {
+export default function AgentBuyPage() {
   const { user } = useAuth();
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);

@@ -16,6 +16,7 @@ interface AuthContextType extends AuthState {
   signUp: (email: string, password: string, meta?: { full_name?: string; phone?: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<AppRole[]>;
   signOut: () => Promise<void>;
+  refreshRoles: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
 }
 
@@ -42,6 +43,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
+          setState((prev) => ({
+            ...prev,
+            user: session.user,
+            session,
+            isAuthenticated: true,
+            loading: true,
+          }));
           const roles = await fetchUserRoles(session.user.id);
           setState({
             user: session.user,
@@ -64,6 +72,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        setState((prev) => ({
+          ...prev,
+          user: session.user,
+          session,
+          isAuthenticated: true,
+          loading: true,
+        }));
         const roles = await fetchUserRoles(session.user.id);
         setState({
           user: session.user,
@@ -73,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isAuthenticated: true,
         });
       } else {
-        setState(prev => ({ ...prev, loading: false }));
+        setState((prev) => ({ ...prev, loading: false }));
       }
     });
 
@@ -95,18 +110,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(async (email: string, password: string): Promise<AppRole[]> => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    const roles = await fetchUserRoles(data.user.id);
-    return roles;
+    if (!data.session || !data.user) throw new Error("No session returned");
+    setState((prev) => ({
+      ...prev,
+      user: data.user,
+      session: data.session,
+      isAuthenticated: true,
+      loading: true,
+    }));
+    try {
+      const roles = await fetchUserRoles(data.user.id);
+      setState({
+        user: data.user,
+        session: data.session,
+        roles,
+        loading: false,
+        isAuthenticated: true,
+      });
+      return roles;
+    } catch (e) {
+      setState((prev) => ({ ...prev, loading: false }));
+      throw e;
+    }
   }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
 
+  const refreshRoles = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+    const roles = await fetchUserRoles(session.user.id);
+    setState((prev) => ({
+      ...prev,
+      user: session.user,
+      session,
+      roles,
+      isAuthenticated: true,
+      loading: false,
+    }));
+  }, []);
+
   const hasRole = useCallback((role: AppRole) => state.roles.includes(role), [state.roles]);
 
   return (
-    <AuthContext.Provider value={{ ...state, signUp, signIn, signOut, hasRole }}>
+    <AuthContext.Provider value={{ ...state, signUp, signIn, signOut, refreshRoles, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

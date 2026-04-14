@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -6,22 +5,15 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Send, Bell, Loader2 } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { sendNotification } from "@/server/admin.functions";
+import { apiPost } from "@/lib/api";
 
-export const Route = createFileRoute("/admin/notifications")({
-  component: NotificationsPage,
-});
-
-function NotificationsPage() {
+export default function NotificationsPage() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [target, setTarget] = useState<"all" | "agents" | "users">("all");
   const [sending, setSending] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const sendNotifFn = useServerFn(sendNotification);
-
   const fetchNotifications = async () => {
     const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(20);
     if (data) setNotifications(data);
@@ -37,7 +29,7 @@ function NotificationsPage() {
     }
     setSending(true);
     try {
-      await sendNotifFn({ data: { title: title.trim(), message: message.trim(), target_type: target } });
+      await apiPost("/api/admin/send-notification", { title: title.trim(), message: message.trim(), target_type: target });
       toast.success(`Notification sent to ${target}!`);
       setTitle("");
       setMessage("");

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Navbar, Footer } from "@/components/LandingPage";
 import { GlassCard } from "@/components/GlassCard";
@@ -22,11 +22,11 @@ export default function LoginPage() {
       const roles = await signIn(email, password);
       toast.success("Welcome back!");
       if (roles.includes("admin")) {
-        navigate({ to: "/admin" });
+        navigate("/admin");
       } else if (roles.includes("agent")) {
-        navigate({ to: "/agent" });
+        navigate("/agent");
       } else {
-        navigate({ to: "/" });
+        navigate("/");
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Login failed";

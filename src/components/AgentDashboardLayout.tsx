@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingCart, FileText, Users, UserPlus,
   DollarSign, Globe, Settings, Menu, X, LogOut, Wallet, ArrowDownToLine, Zap
@@ -29,7 +29,7 @@ export default function AgentDashboardLayout() {
 
   useEffect(() => {
     if (!loading && (!isAuthenticated || (!hasRole("agent") && !hasRole("admin")))) {
-      navigate({ to: "/login" });
+      navigate("/login");
     }
   }, [loading, isAuthenticated, hasRole, navigate]);
 
@@ -50,7 +50,7 @@ export default function AgentDashboardLayout() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate({ to: "/" });
+    navigate("/");
   };
 
   return (

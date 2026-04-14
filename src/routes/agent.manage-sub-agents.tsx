@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +9,7 @@ import { dataBundles, type Network } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Loader2, Save, Copy, UserPlus, Settings } from "lucide-react";
 
-export const Route = createFileRoute("/agent/manage-sub-agents")({
-  component: ManageSubAgentsPage,
-});
-
-function ManageSubAgentsPage() {
+export default function ManageSubAgentsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

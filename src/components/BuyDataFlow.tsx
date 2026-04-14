@@ -9,8 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { dataBundles, type Network, type DataBundle } from "@/lib/mock-data";
 import { Zap, X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { processDataOrder, processWalletPurchase } from "@/server/order.functions";
+import { apiPost } from "@/lib/api";
 
 interface BuyDataFlowProps {
   isAgent?: boolean;
@@ -39,8 +38,6 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
   const [processing, setProcessing] = useState(false);
   const [dbPackages, setDbPackages] = useState<DbPackage[]>([]);
 
-  const processOrderFn = useServerFn(processDataOrder);
-  const processWalletFn = useServerFn(processWalletPurchase);
 
   useEffect(() => {
     supabase.from("global_package_settings").select("*").then(({ data }) => {
@@ -110,15 +107,16 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
       }
 
       try {
-        const result = await processWalletFn({
-          data: {
-            phone: phone.replace(/\s/g, ""),
-            size: parseSizeGB(selectedBundle.size),
-            network: selectedBundle.network,
-            amount: cost,
-            agent_price: selectedBundle.agentPrice,
-            package_size: selectedBundle.size,
-          },
+        const result = await apiPost<{
+          success: boolean;
+          error?: string;
+        }>("/api/order/process-wallet-purchase", {
+          phone: phone.replace(/\s/g, ""),
+          size: parseSizeGB(selectedBundle.size),
+          network: selectedBundle.network,
+          amount: cost,
+          agent_price: selectedBundle.agentPrice,
+          package_size: selectedBundle.size,
         });
 
         if (result.success) {
@@ -155,17 +153,18 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
       callback: async (response: { reference: string }) => {
         setProcessing(true);
         try {
-          const result = await processOrderFn({
-            data: {
-              phone: phone.replace(/\s/g, ""),
-              size: parseSizeGB(selectedBundle.size),
-              network: mapNetworkForApi(selectedBundle.network),
-              amount_paid: price(selectedBundle),
-              agent_price: selectedBundle.agentPrice,
-              paystack_reference: response.reference,
-              package_size: selectedBundle.size,
-              agent_id: agentId,
-            },
+          const result = await apiPost<{
+            success: boolean;
+            error?: string;
+          }>("/api/order/process-data-order", {
+            phone: phone.replace(/\s/g, ""),
+            size: parseSizeGB(selectedBundle.size),
+            network: mapNetworkForApi(selectedBundle.network),
+            amount_paid: price(selectedBundle),
+            agent_price: selectedBundle.agentPrice,
+            paystack_reference: response.reference,
+            package_size: selectedBundle.size,
+            agent_id: agentId,
           });
 
           if (result.success) {

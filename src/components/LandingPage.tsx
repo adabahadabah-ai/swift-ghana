@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
@@ -20,7 +20,7 @@ function Navbar() {
   const getDashboardLink = () => {
     if (hasRole("admin")) return "/admin";
     if (hasRole("agent")) return "/agent";
-    return "/";
+    return "/buy";
   };
 
   return (

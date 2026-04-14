@@ -1,15 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { StatsCard } from "@/components/StatsCard";
 import { GlassCard } from "@/components/GlassCard";
 import { Users, UserPlus, ShoppingCart, DollarSign } from "lucide-react";
 import { salesData } from "@/lib/mock-data";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
-export const Route = createFileRoute("/admin/")({
-  component: AdminOverview,
-});
-
-function AdminOverview() {
+export default function AdminOverview() {
   return (
     <div className="space-y-6 animate-fade-up">
       <h2 className="text-2xl font-heading font-bold text-foreground">Dashboard</h2>

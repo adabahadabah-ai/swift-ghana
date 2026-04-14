@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { dataBundles, type Network } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { updatePackagePrice } from "@/server/admin.functions";
-
-export const Route = createFileRoute("/admin/prices")({
-  component: ManagePricesPage,
-});
+import { apiPost } from "@/lib/api";
 
 interface PackageSetting {
   id: string;
@@ -23,14 +17,12 @@ interface PackageSetting {
   is_unavailable: boolean;
 }
 
-function ManagePricesPage() {
+export default function ManagePricesPage() {
   const [activeNetwork, setActiveNetwork] = useState<Network>("MTN");
   const [dbPackages, setDbPackages] = useState<PackageSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [localEdits, setLocalEdits] = useState<Record<string, { publicPrice: string; agentPrice: string; unavailable: boolean }>>({});
-  const updatePriceFn = useServerFn(updatePackagePrice);
-
   const fetchPackages = async () => {
     const { data } = await supabase.from("global_package_settings").select("*");
     if (data) setDbPackages(data);
@@ -61,14 +53,12 @@ function ManagePricesPage() {
     const values = getValues(b);
     setSavingId(b.id);
     try {
-      await updatePriceFn({
-        data: {
-          network: b.network,
-          package_size: b.size,
-          public_price: parseFloat(values.publicPrice) || 0,
-          agent_price: parseFloat(values.agentPrice) || 0,
-          is_unavailable: values.unavailable,
-        },
+      await apiPost("/api/admin/update-package-price", {
+        network: b.network,
+        package_size: b.size,
+        public_price: parseFloat(values.publicPrice) || 0,
+        agent_price: parseFloat(values.agentPrice) || 0,
+        is_unavailable: values.unavailable,
       });
       toast.success(`${b.size} ${b.network} price updated`);
       const newEdits = { ...localEdits };

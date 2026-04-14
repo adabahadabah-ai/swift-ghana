@@ -1,15 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { agents } from "@/lib/mock-data";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/agents")({
-  component: AdminAgentsPage,
-});
-
-function AdminAgentsPage() {
+export default function AdminAgentsPage() {
   return (
     <div className="space-y-6 animate-fade-up">
       <h2 className="text-2xl font-heading font-bold text-foreground">Agents</h2>
