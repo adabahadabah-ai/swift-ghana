@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp } from "lucide-react";
+import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp, LogOut } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import type { Network } from "@/lib/mock-data";
 
 function Navbar() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { isAuthenticated, hasRole, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -17,10 +18,21 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Authenticated agents/admins go to their dashboard.
+  // Authenticated users who haven't activated (no agent/admin role) go to the
+  // agent-signup page which shows the Step 2 "Pay & Activate" screen.
   const getDashboardLink = () => {
     if (hasRole("admin")) return "/admin";
     if (hasRole("agent")) return "/agent";
-    return "/buy";
+    return "/agent-signup"; // signed in but not yet activated
+  };
+
+  // Whether the user is signed-in but hasn't activated their agent account
+  const isPendingActivation = isAuthenticated && !hasRole("agent") && !hasRole("admin");
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -38,9 +50,20 @@ function Navbar() {
             <Link to="/agent-signup" className="text-muted-foreground hover:text-foreground transition-colors">Become Agent</Link>
           )}
           {isAuthenticated ? (
-            <Link to={getDashboardLink()} className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+            <Link to={getDashboardLink()} className="text-muted-foreground hover:text-foreground transition-colors">
+              {isPendingActivation ? "Activate Account" : "Dashboard"}
+            </Link>
           ) : (
             <Link to="/login" className="text-muted-foreground hover:text-foreground transition-colors">Login</Link>
+          )}
+          {isPendingActivation && (
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
+            </button>
           )}
         </div>
         <Button variant="hero" size="sm" asChild>
