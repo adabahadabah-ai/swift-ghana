@@ -33,9 +33,15 @@ export default function AgentDashboardLayout() {
       navigate("/login");
       return;
     }
-    if (!hasRole("agent") && !hasRole("admin")) {
-      navigate("/agent-signup");
-    }
+    // Give React an extra tick to commit any concurrent role updates (e.g. after payment)
+    // before redirecting away. This prevents a brief /agent-signup redirect after a
+    // successful payment when refreshRoles() and navigate() fire in the same event batch.
+    const id = setTimeout(() => {
+      if (!hasRole("agent") && !hasRole("admin")) {
+        navigate("/agent-signup");
+      }
+    }, 50);
+    return () => clearTimeout(id);
   }, [loading, isAuthenticated, hasRole, navigate]);
 
   if (loading) {
