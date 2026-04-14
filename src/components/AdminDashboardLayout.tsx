@@ -26,7 +26,7 @@ export default function AdminDashboardLayout() {
 
   useEffect(() => {
     if (!loading && (!isAuthenticated || !hasRole("admin"))) {
-      navigate({ to: "/login" });
+      navigate("/login");
     }
   }, [loading, isAuthenticated, hasRole, navigate]);
 
