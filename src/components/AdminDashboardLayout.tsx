@@ -25,11 +25,16 @@ export default function AdminDashboardLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && (!isAuthenticated || !hasRole("admin"))) {
-      navigate("/login");
+    // Don't redirect while still loading auth state
+    if (loading) return;
+    // Once loading is false and the user is NOT an admin, redirect
+    if (!isAuthenticated || !hasRole("admin")) {
+      navigate("/login", { replace: true });
     }
   }, [loading, isAuthenticated, hasRole, navigate]);
 
+  // Show spinner while auth is loading OR while we still have no roles yet
+  // (brief window between session load and fetchUserRoles completing)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

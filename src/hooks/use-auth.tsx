@@ -23,6 +23,13 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function fetchUserRoles(userId: string): Promise<AppRole[]> {
+  // Use a SECURITY DEFINER RPC so RLS policies on user_roles can never block this.
+  // Falls back to direct query if RPC is unavailable.
+  const { data: rpcData, error: rpcErr } = await supabase.rpc("get_my_roles" as any);
+  if (!rpcErr && rpcData) {
+    return (rpcData as { role: AppRole }[]).map((r) => r.role) as AppRole[];
+  }
+  // Fallback: direct query (works when RLS allows it)
   const { data } = await supabase
     .from("user_roles")
     .select("role")
@@ -97,27 +104,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (!data.session || !data.user) throw new Error("No session returned");
-    setState((prev) => ({
-      ...prev,
+    // Fetch roles directly and update state — onAuthStateChange(SIGNED_IN) will
+    // also fire but that's fine; both paths set the same data.
+    const roles = await fetchUserRoles(data.user.id);
+    setState({
       user: data.user,
       session: data.session,
+      roles,
+      loading: false,
       isAuthenticated: true,
-      loading: true,
-    }));
-    try {
-      const roles = await fetchUserRoles(data.user.id);
-      setState({
-        user: data.user,
-        session: data.session,
-        roles,
-        loading: false,
-        isAuthenticated: true,
-      });
-      return roles;
-    } catch (e) {
-      setState((prev) => ({ ...prev, loading: false }));
-      throw e;
-    }
+    });
+    return roles;
   }, []);
 
   const signOut = useCallback(async () => {
