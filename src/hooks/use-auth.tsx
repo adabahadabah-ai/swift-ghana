@@ -22,41 +22,51 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Fetch user roles, preferring the server-side API (which uses the service-role
-// key and bypasses RLS entirely). Falls back to the SECURITY DEFINER RPC and
-// then to a direct table query for local-dev / offline scenarios.
-async function fetchUserRoles(userId: string, accessToken?: string): Promise<AppRole[]> {
-  // Primary: server API — service role bypasses all RLS recursion issues
+// Fetch user roles in priority order:
+//  1. app_metadata in JWT (set via SQL migration — zero DB queries, 100% reliable)
+//  2. Server /api/auth/get-roles (service-role key, bypasses RLS)
+//  3. SECURITY DEFINER RPC (if deployed)
+//  4. Direct table query (last resort)
+async function fetchUserRoles(
+  userId: string,
+  accessToken?: string,
+  appMeta?: Record<string, unknown>
+): Promise<AppRole[]> {
+  // Primary: read roles embedded in the JWT's app_metadata.
+  // Set via: UPDATE auth.users SET raw_app_meta_data = '{"roles":["admin"]}' WHERE email = ...
+  if (appMeta?.roles && Array.isArray(appMeta.roles) && (appMeta.roles as unknown[]).length > 0) {
+    return appMeta.roles as AppRole[];
+  }
+
+  // Secondary: server API with service-role key (bypasses all RLS)
   if (accessToken) {
     try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
       const res = await fetch("/api/auth/get-roles", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: "{}",
+        signal: ctrl.signal,
       });
+      clearTimeout(t);
       if (res.ok) {
         const json = await res.json();
         if (Array.isArray(json.roles)) return json.roles as AppRole[];
       }
     } catch {
-      // network error — fall through
+      // network / timeout — fall through
     }
   }
 
-  // Fallback 1: SECURITY DEFINER RPC (bypasses RLS if deployed)
+  // Fallback 1: SECURITY DEFINER RPC (bypasses RLS if the migration was run)
   const { data: rpcData, error: rpcErr } = await supabase.rpc("get_my_roles" as any);
   if (!rpcErr && Array.isArray(rpcData)) {
     return (rpcData as { role: AppRole }[]).map((r) => r.role);
   }
 
-  // Fallback 2: direct query (may be blocked by RLS depending on DB state)
-  const { data } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  // Fallback 2: direct query
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   return (data?.map((r: { role: AppRole }) => r.role) ?? []) as AppRole[];
 }
 
@@ -87,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         try {
-          const roles = await fetchUserRoles(session.user.id, session.access_token);
+          const roles = await fetchUserRoles(session.user.id, session.access_token, session.user.app_metadata as Record<string, unknown>);
           if (mounted) {
             setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
           }
@@ -126,14 +136,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string): Promise<AppRole[]> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    if (!data.session || !data.user) throw new Error("No session returned");
-    const roles = await fetchUserRoles(data.user.id, data.session.access_token);
-    // Tell the event listener to skip the SIGNED_IN event triggered by this login
+    // Set the skip flag BEFORE signInWithPassword so that onAuthStateChange(SIGNED_IN)
+    // — which fires during or right after the await — is always suppressed. This prevents
+    // the concurrent event handler from fetching roles independently and overwriting state.
     skipNextSignedInRef.current = true;
-    setState({ user: data.user, session: data.session, roles, loading: false, isAuthenticated: true });
-    return roles;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data.session || !data.user) throw new Error("No session returned");
+      const roles = await fetchUserRoles(data.user.id, data.session.access_token, data.user.app_metadata as Record<string, unknown>);
+      setState({ user: data.user, session: data.session, roles, loading: false, isAuthenticated: true });
+      return roles;
+    } catch (err) {
+      skipNextSignedInRef.current = false; // allow future SIGNED_IN events to be handled
+      throw err;
+    }
   }, []);
 
   const signOut = useCallback(async () => {
@@ -144,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshRoles = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
-    const roles = await fetchUserRoles(session.user.id, session.access_token);
+    const roles = await fetchUserRoles(session.user.id, session.access_token, session.user.app_metadata as Record<string, unknown>);
     setState((prev) => ({ ...prev, user: session.user, session, roles, isAuthenticated: true, loading: false }));
   }, []);
 
