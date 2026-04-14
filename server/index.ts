@@ -85,6 +85,11 @@ app.post(
 );
 
 app.post(
+  "/api/admin/approve-agent",
+  asyncHandler(async (req, _res, userId) => adminOps.approveAgentOp(userId, req.body))
+);
+
+app.post(
   "/api/agent/update-store",
   asyncHandler(async (req, _res, userId) => agentOps.updateAgentStoreOp(userId, req.body))
 );

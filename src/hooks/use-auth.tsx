@@ -136,6 +136,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    // Clear local state immediately so UI reflects signed-out status right away
+    setState({
+      user: null,
+      session: null,
+      roles: [],
+      loading: false,
+      isAuthenticated: false,
+    });
   }, []);
 
   const refreshRoles = useCallback(async () => {

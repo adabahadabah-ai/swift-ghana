@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp, LogOut } from "lucide-react";
+import { Zap, Shield, Users, ArrowRight, DollarSign, Globe, ExternalLink, Activity, Sparkles, TrendingUp, LogOut } from "lucide-react"; // Shield used for Admin nav link
 import { GlassCard } from "@/components/GlassCard";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,14 +49,20 @@ function Navbar() {
           {!isAuthenticated && (
             <Link to="/agent-signup" className="text-muted-foreground hover:text-foreground transition-colors">Become Agent</Link>
           )}
-          {isAuthenticated ? (
+          {hasRole("admin") && (
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-1">
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
+          {isAuthenticated && !hasRole("admin") && (
             <Link to={getDashboardLink()} className="text-muted-foreground hover:text-foreground transition-colors">
               {isPendingActivation ? "Activate Account" : "Dashboard"}
             </Link>
-          ) : (
+          )}
+          {!isAuthenticated && (
             <Link to="/login" className="text-muted-foreground hover:text-foreground transition-colors">Login</Link>
           )}
-          {isPendingActivation && (
+          {isAuthenticated && (
             <button
               onClick={handleSignOut}
               className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"

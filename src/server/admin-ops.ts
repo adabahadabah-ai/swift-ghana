@@ -223,3 +223,64 @@ export async function listOrdersOp(actorUserId: string) {
   if (error) throw new Error(error.message);
   return { orders: (orders ?? []) as AdminOrderRow[] };
 }
+
+const approveAgentSchema = z.object({
+  user_id: z.string().uuid(),
+  approve: z.boolean(), // true = grant agent role, false = revoke
+});
+
+/**
+ * Admin-only: approve a user as an agent (bypassing the GH₵80 payment)
+ * or revoke agent access. Also provisions store + wallet records when approving.
+ */
+export async function approveAgentOp(actorUserId: string, body: unknown) {
+  const data = approveAgentSchema.parse(body);
+  await requireAdminUser(actorUserId);
+
+  if (data.approve) {
+    // Grant agent role
+    const { error: roleErr } = await supabaseAdmin.from("user_roles").insert({
+      user_id: data.user_id,
+      role: "agent",
+    });
+    if (roleErr && roleErr.code !== "23505") throw new Error(roleErr.message);
+
+    // Provision store if not exists
+    const { data: existingStore } = await supabaseAdmin
+      .from("agent_stores")
+      .select("id")
+      .eq("agent_id", data.user_id)
+      .maybeSingle();
+    if (!existingStore) {
+      await supabaseAdmin.from("agent_stores").insert({
+        agent_id: data.user_id,
+        store_name: "",
+        store_description: "",
+        support_phone: "",
+        whatsapp_link: "",
+        is_published: false,
+      });
+    }
+
+    // Provision wallet if not exists
+    const { data: existingWallet } = await supabaseAdmin
+      .from("wallets")
+      .select("id")
+      .eq("agent_id", data.user_id)
+      .maybeSingle();
+    if (!existingWallet) {
+      await supabaseAdmin.from("wallets").insert({ agent_id: data.user_id, balance: 0 });
+    }
+
+    return { success: true, action: "approved" };
+  } else {
+    // Revoke agent role
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.user_id)
+      .eq("role", "agent");
+    if (error) throw new Error(error.message);
+    return { success: true, action: "revoked" };
+  }
+}
