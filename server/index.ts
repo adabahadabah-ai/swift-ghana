@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import * as adminOps from "../src/server/admin-ops";
 import * as agentOps from "../src/server/agent-ops";
 import * as orderOps from "../src/server/order-ops";
+import { supabaseAdmin } from "../src/integrations/supabase/client.server";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.API_PORT) || 3001;
@@ -153,6 +154,26 @@ app.post(
   "/api/admin/list-orders",
   asyncHandler(async (_req, _res, userId) => adminOps.listOrdersOp(userId))
 );
+
+// Returns the authenticated user's roles using the service-role key (bypasses RLS).
+// This is the primary mechanism used by the client to detect admin/agent roles
+// without needing the get_my_roles() RPC or working RLS on user_roles.
+app.post("/api/auth/get-roles", async (req, res) => {
+  const userId = await getUserIdFromAuthHeader(req.headers.authorization);
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  if (error) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  res.json({ roles: (data ?? []).map((r) => r.role) });
+});
 
 if (isProd) {
   const dist = path.join(__dirname, "../dist");

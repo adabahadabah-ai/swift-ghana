@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -22,14 +22,37 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-async function fetchUserRoles(userId: string): Promise<AppRole[]> {
-  // Use a SECURITY DEFINER RPC so RLS policies on user_roles can never block this.
-  // Falls back to direct query if RPC is unavailable.
-  const { data: rpcData, error: rpcErr } = await supabase.rpc("get_my_roles" as any);
-  if (!rpcErr && rpcData) {
-    return (rpcData as { role: AppRole }[]).map((r) => r.role) as AppRole[];
+// Fetch user roles, preferring the server-side API (which uses the service-role
+// key and bypasses RLS entirely). Falls back to the SECURITY DEFINER RPC and
+// then to a direct table query for local-dev / offline scenarios.
+async function fetchUserRoles(userId: string, accessToken?: string): Promise<AppRole[]> {
+  // Primary: server API — service role bypasses all RLS recursion issues
+  if (accessToken) {
+    try {
+      const res = await fetch("/api/auth/get-roles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: "{}",
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.roles)) return json.roles as AppRole[];
+      }
+    } catch {
+      // network error — fall through
+    }
   }
-  // Fallback: direct query (works when RLS allows it)
+
+  // Fallback 1: SECURITY DEFINER RPC (bypasses RLS if deployed)
+  const { data: rpcData, error: rpcErr } = await supabase.rpc("get_my_roles" as any);
+  if (!rpcErr && Array.isArray(rpcData)) {
+    return (rpcData as { role: AppRole }[]).map((r) => r.role);
+  }
+
+  // Fallback 2: direct query (may be blocked by RLS depending on DB state)
   const { data } = await supabase
     .from("user_roles")
     .select("role")
@@ -46,45 +69,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
   });
 
+  // When signIn() explicitly fetches roles and updates state, we skip the
+  // concurrent onAuthStateChange(SIGNED_IN) event to prevent a race condition
+  // where the event handler would re-fetch and overwrite the correct state.
+  const skipNextSignedInRef = useRef(false);
+
   useEffect(() => {
     let mounted = true;
 
-    // Handles initial session robustly — works even after React 18 StrictMode
-    // remounts where INITIAL_SESSION from onAuthStateChange may not re-fire.
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-      try {
-        if (session?.user) {
-          const roles = await fetchUserRoles(session.user.id);
-          if (mounted) setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
-        } else {
+
+      if (event === "SIGNED_IN" && skipNextSignedInRef.current) {
+        skipNextSignedInRef.current = false;
+        return;
+      }
+
+      if (session?.user) {
+        try {
+          const roles = await fetchUserRoles(session.user.id, session.access_token);
+          if (mounted) {
+            setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
+          }
+        } catch {
           if (mounted) setState((p) => ({ ...p, loading: false }));
         }
-      } catch {
-        if (mounted) setState((p) => ({ ...p, loading: false }));
+      } else {
+        if (mounted) {
+          setState({ user: null, session: null, roles: [], loading: false, isAuthenticated: false });
+        }
       }
     });
 
-    // Handles subsequent auth events (sign-in, sign-out, token refresh).
-    // Skip INITIAL_SESSION since getSession() handles the initial load above.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'INITIAL_SESSION') return;
-      if (!mounted) return;
-      try {
-        if (session?.user) {
-          const roles = await fetchUserRoles(session.user.id);
-          if (mounted) setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
-        } else {
-          if (mounted) setState({ user: null, session: null, roles: [], loading: false, isAuthenticated: false });
-        }
-      } catch {
-        if (mounted) setState((p) => ({ ...p, loading: false }));
-      }
-    });
+    // Safety net: never leave the app stuck in loading state forever
+    const safetyTimer = setTimeout(() => {
+      if (mounted) setState((p) => (p.loading ? { ...p, loading: false } : p));
+    }, 5000);
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearTimeout(safetyTimer);
     };
   }, []);
 
@@ -104,43 +129,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (!data.session || !data.user) throw new Error("No session returned");
-    // Fetch roles directly and update state — onAuthStateChange(SIGNED_IN) will
-    // also fire but that's fine; both paths set the same data.
-    const roles = await fetchUserRoles(data.user.id);
-    setState({
-      user: data.user,
-      session: data.session,
-      roles,
-      loading: false,
-      isAuthenticated: true,
-    });
+    const roles = await fetchUserRoles(data.user.id, data.session.access_token);
+    // Tell the event listener to skip the SIGNED_IN event triggered by this login
+    skipNextSignedInRef.current = true;
+    setState({ user: data.user, session: data.session, roles, loading: false, isAuthenticated: true });
     return roles;
   }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    // Clear local state immediately so UI reflects signed-out status right away
-    setState({
-      user: null,
-      session: null,
-      roles: [],
-      loading: false,
-      isAuthenticated: false,
-    });
+    setState({ user: null, session: null, roles: [], loading: false, isAuthenticated: false });
   }, []);
 
   const refreshRoles = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
-    const roles = await fetchUserRoles(session.user.id);
-    setState((prev) => ({
-      ...prev,
-      user: session.user,
-      session,
-      roles,
-      isAuthenticated: true,
-      loading: false,
-    }));
+    const roles = await fetchUserRoles(session.user.id, session.access_token);
+    setState((prev) => ({ ...prev, user: session.user, session, roles, isAuthenticated: true, loading: false }));
   }, []);
 
   const hasRole = useCallback((role: AppRole) => state.roles.includes(role), [state.roles]);
