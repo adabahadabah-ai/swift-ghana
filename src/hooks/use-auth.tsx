@@ -43,13 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
-          setState((prev) => ({
-            ...prev,
-            user: session.user,
-            session,
-            isAuthenticated: true,
-            loading: true,
-          }));
           const roles = await fetchUserRoles(session.user.id);
           setState({
             user: session.user,
@@ -69,28 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     );
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        setState((prev) => ({
-          ...prev,
-          user: session.user,
-          session,
-          isAuthenticated: true,
-          loading: true,
-        }));
-        const roles = await fetchUserRoles(session.user.id);
-        setState({
-          user: session.user,
-          session,
-          roles,
-          loading: false,
-          isAuthenticated: true,
-        });
-      } else {
-        setState((prev) => ({ ...prev, loading: false }));
-      }
-    });
 
     return () => subscription.unsubscribe();
   }, []);

@@ -21,7 +21,7 @@ interface PackageSetting {
 
 const NETWORKS: Network[] = ["MTN", "AirtelTigo", "Telecel"];
 
-const emptyForm = { package_size: "", public_price: "", agent_price: "", validity: "30 days" };
+const emptyForm = { package_size: "", public_price: "", agent_price: "", validity: "No Expiry" };
 
 export default function ManagePricesPage() {
   const [activeNetwork, setActiveNetwork] = useState<Network>("MTN");

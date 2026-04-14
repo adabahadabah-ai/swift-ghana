@@ -42,24 +42,24 @@ export const networks: { name: Network; color: string; logo: string }[] = [
 
 export const dataBundles: DataBundle[] = [
   // MTN
-  { id: "mtn-1", network: "MTN", size: "1GB", regularPrice: 5, agentPrice: 4, validity: "30 days" },
-  { id: "mtn-2", network: "MTN", size: "2GB", regularPrice: 9, agentPrice: 7.5, validity: "30 days" },
-  { id: "mtn-3", network: "MTN", size: "5GB", regularPrice: 20, agentPrice: 16, validity: "30 days", popular: true },
-  { id: "mtn-4", network: "MTN", size: "10GB", regularPrice: 35, agentPrice: 28, validity: "30 days", cheapest: true },
-  { id: "mtn-5", network: "MTN", size: "20GB", regularPrice: 60, agentPrice: 48, validity: "30 days" },
-  { id: "mtn-6", network: "MTN", size: "50GB", regularPrice: 120, agentPrice: 96, validity: "30 days" },
+  { id: "mtn-1", network: "MTN", size: "1GB", regularPrice: 5, agentPrice: 4, validity: "No Expiry" },
+  { id: "mtn-2", network: "MTN", size: "2GB", regularPrice: 9, agentPrice: 7.5, validity: "No Expiry" },
+  { id: "mtn-3", network: "MTN", size: "5GB", regularPrice: 20, agentPrice: 16, validity: "No Expiry", popular: true },
+  { id: "mtn-4", network: "MTN", size: "10GB", regularPrice: 35, agentPrice: 28, validity: "No Expiry", cheapest: true },
+  { id: "mtn-5", network: "MTN", size: "20GB", regularPrice: 60, agentPrice: 48, validity: "No Expiry" },
+  { id: "mtn-6", network: "MTN", size: "50GB", regularPrice: 120, agentPrice: 96, validity: "No Expiry" },
   // AirtelTigo
-  { id: "at-1", network: "AirtelTigo", size: "1GB", regularPrice: 4.5, agentPrice: 3.5, validity: "30 days", cheapest: true },
-  { id: "at-2", network: "AirtelTigo", size: "2GB", regularPrice: 8, agentPrice: 6.5, validity: "30 days" },
-  { id: "at-3", network: "AirtelTigo", size: "5GB", regularPrice: 18, agentPrice: 14.5, validity: "30 days", popular: true },
-  { id: "at-4", network: "AirtelTigo", size: "10GB", regularPrice: 32, agentPrice: 26, validity: "30 days" },
-  { id: "at-5", network: "AirtelTigo", size: "20GB", regularPrice: 55, agentPrice: 44, validity: "30 days" },
+  { id: "at-1", network: "AirtelTigo", size: "1GB", regularPrice: 4.5, agentPrice: 3.5, validity: "No Expiry", cheapest: true },
+  { id: "at-2", network: "AirtelTigo", size: "2GB", regularPrice: 8, agentPrice: 6.5, validity: "No Expiry" },
+  { id: "at-3", network: "AirtelTigo", size: "5GB", regularPrice: 18, agentPrice: 14.5, validity: "No Expiry", popular: true },
+  { id: "at-4", network: "AirtelTigo", size: "10GB", regularPrice: 32, agentPrice: 26, validity: "No Expiry" },
+  { id: "at-5", network: "AirtelTigo", size: "20GB", regularPrice: 55, agentPrice: 44, validity: "No Expiry" },
   // Telecel
-  { id: "tc-1", network: "Telecel", size: "1GB", regularPrice: 4.8, agentPrice: 3.8, validity: "30 days" },
-  { id: "tc-2", network: "Telecel", size: "2GB", regularPrice: 8.5, agentPrice: 7, validity: "30 days" },
-  { id: "tc-3", network: "Telecel", size: "5GB", regularPrice: 19, agentPrice: 15, validity: "30 days", popular: true },
-  { id: "tc-4", network: "Telecel", size: "10GB", regularPrice: 33, agentPrice: 27, validity: "30 days", cheapest: true },
-  { id: "tc-5", network: "Telecel", size: "15GB", regularPrice: 45, agentPrice: 36, validity: "30 days" },
+  { id: "tc-1", network: "Telecel", size: "1GB", regularPrice: 4.8, agentPrice: 3.8, validity: "No Expiry" },
+  { id: "tc-2", network: "Telecel", size: "2GB", regularPrice: 8.5, agentPrice: 7, validity: "No Expiry" },
+  { id: "tc-3", network: "Telecel", size: "5GB", regularPrice: 19, agentPrice: 15, validity: "No Expiry", popular: true },
+  { id: "tc-4", network: "Telecel", size: "10GB", regularPrice: 33, agentPrice: 27, validity: "No Expiry", cheapest: true },
+  { id: "tc-5", network: "Telecel", size: "15GB", regularPrice: 45, agentPrice: 36, validity: "No Expiry" },
 ];
 
 export const recentOrders: Order[] = [
