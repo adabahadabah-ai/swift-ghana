@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { dataBundles, type Network } from "@/lib/mock-data";
+import { type Network } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Loader2, Globe, Copy, ExternalLink, Save, Eye } from "lucide-react";
 import { apiPost } from "@/lib/api";
@@ -21,6 +21,7 @@ interface DbGlobalPackage {
   agent_price: number | null;
   public_price: number | null;
   is_unavailable: boolean;
+  validity: string;
 }
 
 export default function AgentStorePage() {
@@ -66,8 +67,7 @@ export default function AgentStorePage() {
 
   const getAgentPrice = (network: string, size: string) => {
     const global = globalPackages.find((g) => g.network === network && g.package_size === size);
-    const mock = dataBundles.find((b) => b.network === network && b.size === size);
-    return global?.agent_price ?? mock?.agentPrice ?? 0;
+    return global?.agent_price ?? 0;
   };
 
   const getSellingPrice = (network: string, size: string) => {
@@ -75,10 +75,8 @@ export default function AgentStorePage() {
     if (localPrices[key] !== undefined) return localPrices[key];
     const pkg = storePackages.find((p) => p.network === network && p.package_size === size);
     if (pkg) return pkg.selling_price.toString();
-    // Default to public price
     const global = globalPackages.find((g) => g.network === network && g.package_size === size);
-    const mock = dataBundles.find((b) => b.network === network && b.size === size);
-    return (global?.public_price ?? mock?.regularPrice ?? 0).toString();
+    return (global?.public_price ?? 0).toString();
   };
 
   const getProfit = (network: string, size: string) => {
@@ -106,12 +104,12 @@ export default function AgentStorePage() {
     if (!user) return;
     setSaving(true);
 
-    const bundles = dataBundles.filter((b) => b.network === activeNetwork);
-    const upserts = bundles.map((b) => ({
+    const bundles = globalPackages.filter((g) => g.network === activeNetwork && !g.is_unavailable);
+    const upserts = bundles.map((g) => ({
       agent_id: user.id,
-      network: b.network,
-      package_size: b.size,
-      selling_price: parseFloat(getSellingPrice(b.network, b.size)) || 0,
+      network: g.network,
+      package_size: g.package_size,
+      selling_price: parseFloat(getSellingPrice(g.network, g.package_size)) || 0,
     }));
 
     for (const pkg of upserts) {
@@ -263,20 +261,20 @@ export default function AgentStorePage() {
               </tr>
             </thead>
             <tbody>
-              {bundles.map((b) => {
-                const profit = getProfit(b.network, b.size);
+              {bundles.map((g) => {
+                const profit = getProfit(g.network, g.package_size);
                 return (
-                  <tr key={b.id} className="border-b border-glass-border/50">
+                  <tr key={g.package_size} className="border-b border-glass-border/50">
                     <td className="py-3 px-2">
-                      <span className="font-medium text-foreground">{b.size}</span>
-                      <span className="text-muted-foreground ml-2 text-xs">{b.validity}</span>
+                      <span className="font-medium text-foreground">{g.package_size}</span>
+                      <span className="text-muted-foreground ml-2 text-xs">{g.validity ?? "30 days"}</span>
                     </td>
-                    <td className="py-3 px-2 text-muted-foreground">GH₵{getAgentPrice(b.network, b.size).toFixed(2)}</td>
+                    <td className="py-3 px-2 text-muted-foreground">GH₵{getAgentPrice(g.network, g.package_size).toFixed(2)}</td>
                     <td className="py-3 px-2">
                       <Input
                         type="number"
-                        value={getSellingPrice(b.network, b.size)}
-                        onChange={(e) => setLocalPrices({ ...localPrices, [`${b.network}-${b.size}`]: e.target.value })}
+                        value={getSellingPrice(g.network, g.package_size)}
+                        onChange={(e) => setLocalPrices({ ...localPrices, [`${g.network}-${g.package_size}`]: e.target.value })}
                         className="h-8 w-24 bg-glass border-glass-border rounded-lg text-sm"
                         step="0.01"
                       />

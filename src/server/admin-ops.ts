@@ -284,3 +284,43 @@ export async function approveAgentOp(actorUserId: string, body: unknown) {
     return { success: true, action: "revoked" };
   }
 }
+
+const createPackageSchema = z.object({
+  network: z.enum(["MTN", "AirtelTigo", "Telecel"]),
+  package_size: z.string().min(1).max(50),
+  public_price: z.number().min(0),
+  agent_price: z.number().min(0),
+  validity: z.string().min(1).max(50).default("30 days"),
+});
+
+export async function createPackageOp(actorUserId: string, body: unknown) {
+  const data = createPackageSchema.parse(body);
+  await requireAdminUser(actorUserId);
+
+  const { error } = await supabaseAdmin.from("global_package_settings").insert({
+    network: data.network,
+    package_size: data.package_size,
+    public_price: data.public_price,
+    agent_price: data.agent_price,
+    is_unavailable: false,
+    validity: data.validity,
+  });
+  if (error) throw new Error(error.message);
+  return { success: true };
+}
+
+const deletePackageSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export async function deletePackageOp(actorUserId: string, body: unknown) {
+  const data = deletePackageSchema.parse(body);
+  await requireAdminUser(actorUserId);
+
+  const { error } = await supabaseAdmin
+    .from("global_package_settings")
+    .delete()
+    .eq("id", data.id);
+  if (error) throw new Error(error.message);
+  return { success: true };
+}

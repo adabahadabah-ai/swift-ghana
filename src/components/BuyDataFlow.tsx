@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SuccessModal } from "@/components/SuccessModal";
 import { supabase } from "@/integrations/supabase/client";
-import { dataBundles, type Network, type DataBundle } from "@/lib/mock-data";
+import { type Network, type DataBundle } from "@/lib/mock-data";
 import { Zap, X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { apiPost } from "@/lib/api";
@@ -77,25 +77,19 @@ export default function BuyDataFlow({
 
   const getBundles = (): DataBundle[] => {
     if (!network) return [];
-    const mockBundles = dataBundles.filter((b) => b.network === network);
-    return mockBundles.map((b) => {
-      const dbMatch = dbPackages.find((d) => d.network === b.network && d.package_size === b.size);
-      const customSell = agentSellingPrices?.[bundleKey(b.network, b.size)];
-      if (dbMatch) {
-        if (dbMatch.is_unavailable) return null;
-        const basePublic = dbMatch.public_price ?? b.regularPrice;
-        const baseAgent = dbMatch.agent_price ?? b.agentPrice;
+    return dbPackages
+      .filter((d) => d.network === network && !d.is_unavailable)
+      .map((d) => {
+        const customSell = agentSellingPrices?.[bundleKey(d.network, d.package_size)];
         return {
-          ...b,
-          regularPrice: customSell ?? basePublic,
-          agentPrice: baseAgent,
-        };
-      }
-      if (customSell != null) {
-        return { ...b, regularPrice: customSell };
-      }
-      return b;
-    }).filter(Boolean) as DataBundle[];
+          id: d.id,
+          network: d.network as Network,
+          size: d.package_size,
+          regularPrice: customSell ?? (d.public_price ?? 0),
+          agentPrice: d.agent_price ?? 0,
+          validity: (d as any).validity ?? "30 days",
+        } satisfies DataBundle;
+      });
   };
 
   const bundles = getBundles();

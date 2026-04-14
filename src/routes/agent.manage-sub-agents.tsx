@@ -5,7 +5,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { dataBundles, type Network } from "@/lib/mock-data";
+import { type Network } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Loader2, Save, Copy, UserPlus, Settings } from "lucide-react";
 
@@ -48,8 +48,7 @@ export default function ManageSubAgentsPage() {
 
   const getAgentPrice = (network: string, size: string) => {
     const global = globalPackages.find((g: any) => g.network === network && g.package_size === size);
-    const mock = dataBundles.find((b) => b.network === network && b.size === size);
-    return global?.agent_price ?? mock?.agentPrice ?? 0;
+    return global?.agent_price ?? 0;
   };
 
   const getSubAgentPrice = (network: string, size: string) => {
@@ -65,13 +64,13 @@ export default function ManageSubAgentsPage() {
   const handleSavePrices = async () => {
     if (!user) return;
     setSaving(true);
-    const bundles = dataBundles.filter((b) => b.network === activeNetwork);
-    for (const b of bundles) {
-      const price = parseFloat(getSubAgentPrice(b.network, b.size)) || 0;
+    const bundles = globalPackages.filter((g: any) => g.network === activeNetwork && !g.is_unavailable);
+    for (const g of bundles) {
+      const price = parseFloat(getSubAgentPrice(g.network, g.package_size)) || 0;
       await supabase.from("sub_agent_packages").upsert({
         agent_id: user.id,
-        network: b.network,
-        package_size: b.size,
+        network: g.network,
+        package_size: g.package_size,
         sub_agent_price: price,
       }, { onConflict: "agent_id,network,package_size" });
     }
@@ -188,19 +187,19 @@ export default function ManageSubAgentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {bundles.map((b) => {
-                  const agentCost = getAgentPrice(b.network, b.size);
-                  const subPrice = parseFloat(getSubAgentPrice(b.network, b.size)) || 0;
+                {bundles.map((g: any) => {
+                  const agentCost = getAgentPrice(g.network, g.package_size);
+                  const subPrice = parseFloat(getSubAgentPrice(g.network, g.package_size)) || 0;
                   const profit = subPrice - agentCost;
                   return (
-                    <tr key={b.id} className="border-b border-glass-border/50">
-                      <td className="py-3 px-2 font-medium text-foreground">{b.size}</td>
+                    <tr key={g.id} className="border-b border-glass-border/50">
+                      <td className="py-3 px-2 font-medium text-foreground">{g.package_size}</td>
                       <td className="py-3 px-2 text-muted-foreground">GH₵{agentCost.toFixed(2)}</td>
                       <td className="py-3 px-2">
                         <Input
                           type="number"
-                          value={getSubAgentPrice(b.network, b.size)}
-                          onChange={(e) => setLocalPrices({ ...localPrices, [`${b.network}-${b.size}`]: e.target.value })}
+                          value={getSubAgentPrice(g.network, g.package_size)}
+                          onChange={(e) => setLocalPrices({ ...localPrices, [`${g.network}-${g.package_size}`]: e.target.value })}
                           className="h-8 w-24 bg-glass border-glass-border rounded-lg text-sm"
                           step="0.01"
                         />

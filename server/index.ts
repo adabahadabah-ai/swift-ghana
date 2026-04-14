@@ -90,6 +90,16 @@ app.post(
 );
 
 app.post(
+  "/api/admin/create-package",
+  asyncHandler(async (req, _res, userId) => adminOps.createPackageOp(userId, req.body))
+);
+
+app.post(
+  "/api/admin/delete-package",
+  asyncHandler(async (req, _res, userId) => adminOps.deletePackageOp(userId, req.body))
+);
+
+app.post(
   "/api/agent/update-store",
   asyncHandler(async (req, _res, userId) => agentOps.updateAgentStoreOp(userId, req.body))
 );

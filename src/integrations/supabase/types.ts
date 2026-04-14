@@ -89,6 +89,7 @@ export type Database = {
           package_size: string
           public_price: number | null
           updated_at: string
+          validity: string
         }
         Insert: {
           agent_price?: number | null
@@ -98,6 +99,7 @@ export type Database = {
           package_size: string
           public_price?: number | null
           updated_at?: string
+          validity?: string
         }
         Update: {
           agent_price?: number | null
@@ -107,6 +109,7 @@ export type Database = {
           package_size?: string
           public_price?: number | null
           updated_at?: string
+          validity?: string
         }
         Relationships: []
       }
