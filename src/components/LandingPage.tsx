@@ -350,6 +350,15 @@ function Footer() {
 export { Navbar, Footer };
 
 export default function LandingPage() {
+  const { loading, hasRole } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (hasRole("admin")) navigate("/admin", { replace: true });
+    else if (hasRole("agent")) navigate("/agent", { replace: true });
+  }, [loading, hasRole, navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

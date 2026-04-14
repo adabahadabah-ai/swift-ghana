@@ -42,7 +42,14 @@ export default function AdminWithdrawalsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchWithdrawals(); }, []);
+  useEffect(() => {
+    fetchWithdrawals();
+    const channel = supabase
+      .channel("admin-withdrawals-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, () => fetchWithdrawals())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const handleConfirm = async (id: string) => {
     setConfirming(id);

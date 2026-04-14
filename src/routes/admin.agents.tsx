@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { apiPost } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import type { DirectoryUserRow } from "@/types/directory-user";
 import { Loader2, UserCheck, UserX } from "lucide-react";
 
@@ -24,7 +25,15 @@ export default function AdminAgentsPage() {
     }
   }, []);
 
-  useEffect(() => { loadUsers(); }, [loadUsers]);
+  useEffect(() => {
+    loadUsers();
+    const channel = supabase
+      .channel("admin-agents-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, () => loadUsers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadUsers())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [loadUsers]);
 
   const toggleAgent = async (row: DirectoryUserRow) => {
     const isAgent = row.roles.includes("agent");

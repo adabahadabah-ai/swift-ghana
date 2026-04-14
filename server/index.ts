@@ -100,6 +100,11 @@ app.post(
 );
 
 app.post(
+  "/api/admin/list-orders",
+  asyncHandler(async (_req, _res, userId) => adminOps.listOrdersOp(userId))
+);
+
+app.post(
   "/api/agent/update-store",
   asyncHandler(async (req, _res, userId) => agentOps.updateAgentStoreOp(userId, req.body))
 );

@@ -20,7 +20,14 @@ export default function NotificationsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchNotifications(); }, []);
+  useEffect(() => {
+    fetchNotifications();
+    const channel = supabase
+      .channel("admin-notifications-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => fetchNotifications())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const handleSend = async () => {
     if (!title.trim() || !message.trim()) {

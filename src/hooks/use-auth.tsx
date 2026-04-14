@@ -40,30 +40,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+    let mounted = true;
+
+    // Handles initial session robustly — works even after React 18 StrictMode
+    // remounts where INITIAL_SESSION from onAuthStateChange may not re-fire.
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
+      try {
         if (session?.user) {
           const roles = await fetchUserRoles(session.user.id);
-          setState({
-            user: session.user,
-            session,
-            roles,
-            loading: false,
-            isAuthenticated: true,
-          });
+          if (mounted) setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
         } else {
-          setState({
-            user: null,
-            session: null,
-            roles: [],
-            loading: false,
-            isAuthenticated: false,
-          });
+          if (mounted) setState((p) => ({ ...p, loading: false }));
         }
+      } catch {
+        if (mounted) setState((p) => ({ ...p, loading: false }));
       }
-    );
+    });
 
-    return () => subscription.unsubscribe();
+    // Handles subsequent auth events (sign-in, sign-out, token refresh).
+    // Skip INITIAL_SESSION since getSession() handles the initial load above.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') return;
+      if (!mounted) return;
+      try {
+        if (session?.user) {
+          const roles = await fetchUserRoles(session.user.id);
+          if (mounted) setState({ user: session.user, session, roles, loading: false, isAuthenticated: true });
+        } else {
+          if (mounted) setState({ user: null, session: null, roles: [], loading: false, isAuthenticated: false });
+        }
+      } catch {
+        if (mounted) setState((p) => ({ ...p, loading: false }));
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, meta?: { full_name?: string; phone?: string }) => {

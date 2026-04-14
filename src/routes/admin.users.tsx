@@ -3,6 +3,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiPost } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import type { DirectoryUserRow } from "@/types/directory-user";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -28,6 +29,12 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     loadUsers();
+    const channel = supabase
+      .channel("admin-users-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, () => loadUsers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadUsers())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [loadUsers]);
 
   const toggleAdmin = async (row: DirectoryUserRow) => {

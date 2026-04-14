@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiPost } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,6 +43,11 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     load();
+    const channel = supabase
+      .channel("admin-orders-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [load]);
 
   if (loading) {
