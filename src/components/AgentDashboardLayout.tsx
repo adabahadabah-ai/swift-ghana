@@ -28,8 +28,13 @@ export default function AgentDashboardLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && (!isAuthenticated || (!hasRole("agent") && !hasRole("admin")))) {
+    if (loading) return;
+    if (!isAuthenticated) {
       navigate("/login");
+      return;
+    }
+    if (!hasRole("agent") && !hasRole("admin")) {
+      navigate("/agent-signup");
     }
   }, [loading, isAuthenticated, hasRole, navigate]);
 

@@ -45,7 +45,9 @@ function asyncHandler(
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Server error";
       const status =
-        message === "Unauthorized: admin only" || message === "Forbidden: agent_id must match authenticated user"
+        message === "Unauthorized: admin only" ||
+        message === "Forbidden: agent only" ||
+        message === "Forbidden: agent_id must match authenticated user"
           ? 403
           : message === "Unauthorized"
             ? 401
@@ -97,10 +99,15 @@ app.post(
   asyncHandler(async (req, _res, userId) => agentOps.verifyTopUpOp(userId, req.body))
 );
 
-app.post(
-  "/api/order/process-data-order",
-  asyncHandler(async (req, _res, userId) => orderOps.processDataOrderOp(userId, req.body))
-);
+app.post("/api/order/process-data-order-public", async (req, res) => {
+  try {
+    const result = await orderOps.processDataOrderPublicOp(req.body);
+    res.json(result);
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Server error";
+    res.status(400).json({ error: message });
+  }
+});
 
 app.post(
   "/api/order/process-wallet-purchase",
@@ -110,6 +117,21 @@ app.post(
 app.post(
   "/api/order/create-agent-store",
   asyncHandler(async (req, _res, userId) => orderOps.createAgentStoreOp(userId, req.body))
+);
+
+app.post(
+  "/api/agent/verify-registration-fee",
+  asyncHandler(async (req, _res, userId) => agentOps.verifyAgentRegistrationFeeOp(userId, req.body))
+);
+
+app.post(
+  "/api/agent/list-orders",
+  asyncHandler(async (_req, _res, userId) => agentOps.listAgentOrdersOp(userId))
+);
+
+app.post(
+  "/api/admin/list-orders",
+  asyncHandler(async (_req, _res, userId) => adminOps.listOrdersOp(userId))
 );
 
 if (isProd) {

@@ -200,3 +200,26 @@ export async function confirmWithdrawalOp(actorUserId: string, body: unknown) {
 
   return { success: true };
 }
+
+export type AdminOrderRow = {
+  id: string;
+  created_at: string;
+  customer_phone: string | null;
+  network: string | null;
+  package_size: string | null;
+  amount: number;
+  status: string;
+  agent_id: string | null;
+  profit: number;
+};
+
+export async function listOrdersOp(actorUserId: string) {
+  await requireAdminUser(actorUserId);
+  const { data: orders, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, created_at, customer_phone, network, package_size, amount, status, agent_id, profit")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw new Error(error.message);
+  return { orders: (orders ?? []) as AdminOrderRow[] };
+}

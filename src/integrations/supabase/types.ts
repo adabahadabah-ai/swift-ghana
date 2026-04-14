@@ -198,7 +198,7 @@ export type Database = {
           afa_ghana_card: string | null
           afa_occupation: string | null
           afa_residence: string | null
-          agent_id: string
+          agent_id: string | null
           amount: number
           created_at: string
           customer_phone: string | null
@@ -207,6 +207,7 @@ export type Database = {
           network: string | null
           order_type: string
           package_size: string | null
+          paystack_reference: string | null
           profit: number
           status: string
           updated_at: string
@@ -218,7 +219,7 @@ export type Database = {
           afa_ghana_card?: string | null
           afa_occupation?: string | null
           afa_residence?: string | null
-          agent_id?: string
+          agent_id?: string | null
           amount?: number
           created_at?: string
           customer_phone?: string | null
@@ -227,6 +228,7 @@ export type Database = {
           network?: string | null
           order_type?: string
           package_size?: string | null
+          paystack_reference?: string | null
           profit?: number
           status?: string
           updated_at?: string
@@ -238,7 +240,7 @@ export type Database = {
           afa_ghana_card?: string | null
           afa_occupation?: string | null
           afa_residence?: string | null
-          agent_id?: string
+          agent_id?: string | null
           amount?: number
           created_at?: string
           customer_phone?: string | null
@@ -247,6 +249,7 @@ export type Database = {
           network?: string | null
           order_type?: string
           package_size?: string | null
+          paystack_reference?: string | null
           profit?: number
           status?: string
           updated_at?: string

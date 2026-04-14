@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 const statusStyles = {
   completed: "bg-[oklch(0.65_0.20_155/12%)] text-[oklch(0.72_0.19_155)] border-[oklch(0.65_0.20_155/20%)]",
   pending: "bg-gold-muted text-primary border-primary/20",
+  processing: "bg-muted/80 text-muted-foreground border-border",
   failed: "bg-destructive/10 text-destructive border-destructive/20",
   active: "bg-[oklch(0.65_0.20_155/12%)] text-[oklch(0.72_0.19_155)] border-[oklch(0.65_0.20_155/20%)]",
   blocked: "bg-destructive/10 text-destructive border-destructive/20",

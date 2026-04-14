@@ -128,8 +128,8 @@ export default function AgentStorePage() {
     setSaving(false);
   };
 
-  const storeUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/store/${user?.id?.slice(0, 8) || "agent"}`
+  const storeUrl = typeof window !== "undefined" && user?.id
+    ? `${window.location.origin}/store/${user.id}`
     : "";
 
   const copyLink = () => {

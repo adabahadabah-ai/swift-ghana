@@ -17,7 +17,10 @@ interface BuyDataFlowProps {
   useWallet?: boolean;
   walletBalance?: number;
   onWalletPurchase?: (amount: number) => void;
+  /** Mini-store owner (UUID). Omit on main /buy for platform orders. */
   agentId?: string;
+  /** When set (mini-store), customer pays these prices; keys: `${network}|${size}` */
+  agentSellingPrices?: Record<string, number>;
 }
 
 interface DbPackage {
@@ -29,7 +32,19 @@ interface DbPackage {
   is_unavailable: boolean;
 }
 
-export default function BuyDataFlow({ isAgent = false, storeName, useWallet = false, walletBalance = 0, onWalletPurchase, agentId }: BuyDataFlowProps) {
+function bundleKey(network: string, size: string) {
+  return `${network}|${size}`;
+}
+
+export default function BuyDataFlow({
+  isAgent = false,
+  storeName,
+  useWallet = false,
+  walletBalance = 0,
+  onWalletPurchase,
+  agentId,
+  agentSellingPrices,
+}: BuyDataFlowProps) {
   const [network, setNetwork] = useState<Network | null>(null);
   const [phone, setPhone] = useState("");
   const [selectedBundle, setSelectedBundle] = useState<DataBundle | null>(null);
@@ -39,10 +54,25 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
   const [dbPackages, setDbPackages] = useState<DbPackage[]>([]);
 
 
-  useEffect(() => {
+  const loadPackages = () => {
     supabase.from("global_package_settings").select("*").then(({ data }) => {
       if (data) setDbPackages(data);
     });
+  };
+
+  useEffect(() => {
+    loadPackages();
+    const channel = supabase
+      .channel("global_package_settings_rt")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "global_package_settings" },
+        () => loadPackages()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const getBundles = (): DataBundle[] => {
@@ -50,13 +80,19 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
     const mockBundles = dataBundles.filter((b) => b.network === network);
     return mockBundles.map((b) => {
       const dbMatch = dbPackages.find((d) => d.network === b.network && d.package_size === b.size);
+      const customSell = agentSellingPrices?.[bundleKey(b.network, b.size)];
       if (dbMatch) {
         if (dbMatch.is_unavailable) return null;
+        const basePublic = dbMatch.public_price ?? b.regularPrice;
+        const baseAgent = dbMatch.agent_price ?? b.agentPrice;
         return {
           ...b,
-          regularPrice: dbMatch.public_price ?? b.regularPrice,
-          agentPrice: dbMatch.agent_price ?? b.agentPrice,
+          regularPrice: customSell ?? basePublic,
+          agentPrice: baseAgent,
         };
+      }
+      if (customSell != null) {
+        return { ...b, regularPrice: customSell };
       }
       return b;
     }).filter(Boolean) as DataBundle[];
@@ -156,7 +192,7 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
           const result = await apiPost<{
             success: boolean;
             error?: string;
-          }>("/api/order/process-data-order", {
+          }>("/api/order/process-data-order-public", {
             phone: phone.replace(/\s/g, ""),
             size: parseSizeGB(selectedBundle.size),
             network: mapNetworkForApi(selectedBundle.network),
@@ -164,7 +200,7 @@ export default function BuyDataFlow({ isAgent = false, storeName, useWallet = fa
             agent_price: selectedBundle.agentPrice,
             paystack_reference: response.reference,
             package_size: selectedBundle.size,
-            agent_id: agentId,
+            ...(agentId ? { agent_id: agentId } : {}),
           });
 
           if (result.success) {

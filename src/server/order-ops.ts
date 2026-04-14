@@ -1,21 +1,42 @@
 import { supabaseAdmin } from "../integrations/supabase/client.server";
 import { z } from "zod";
+import { verifyPaystackTransaction } from "./paystack-verify";
 
 const DATA_API_URL = "https://nanafua.com/api/v1/order";
 
-const processDataOrderSchema = z.object({
+const processDataOrderPublicSchema = z.object({
   phone: z.string().min(10).max(15),
   size: z.number().min(1),
   network: z.string().min(1).max(50),
   amount_paid: z.number().min(0),
   agent_price: z.number().min(0),
-  paystack_reference: z.string().max(255).optional(),
   package_size: z.string().min(1).max(50),
+  paystack_reference: z.string().min(1).max(255),
+  /** Mini-store agent; omit for main-site (platform) orders */
   agent_id: z.string().uuid().optional(),
 });
 
-export async function processDataOrderOp(userId: string, body: unknown) {
-  const data = processDataOrderSchema.parse(body);
+/**
+ * Guest + logged-in checkout: verifies Paystack server-side, then fulfills data.
+ * No Supabase session required (regular users buy without an account).
+ */
+export async function processDataOrderPublicOp(body: unknown) {
+  const data = processDataOrderPublicSchema.parse(body);
+
+  const verified = await verifyPaystackTransaction(data.paystack_reference);
+  if (Math.abs(verified.amountGHS - data.amount_paid) > 0.05) {
+    throw new Error("Paid amount does not match order total");
+  }
+
+  const { data: dup } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("paystack_reference", data.paystack_reference)
+    .maybeSingle();
+  if (dup) {
+    return { success: true, order_id: dup.id, duplicate: true as const };
+  }
+
   const apiKey = process.env.DATA_ORDER_API_KEY;
   if (!apiKey) throw new Error("Data order API key not configured");
 
@@ -26,19 +47,24 @@ export async function processDataOrderOp(userId: string, body: unknown) {
     apiNetwork = "AIRTELTIGO_ISHARE";
   }
 
-  const profit = data.amount_paid - data.agent_price;
-  const agentId = data.agent_id ?? userId;
+  const agentId = data.agent_id ?? null;
+  const profit = agentId ? Math.max(0, data.amount_paid - data.agent_price) : 0;
 
-  const { data: order, error: orderError } = await supabaseAdmin.from("orders").insert({
-    agent_id: agentId,
-    amount: data.amount_paid,
-    profit: Math.max(0, profit),
-    order_type: "data",
-    customer_phone: cleanPhone,
-    network: data.network,
-    package_size: data.package_size,
-    status: "processing",
-  }).select("id").single();
+  const { data: order, error: orderError } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      agent_id: agentId,
+      amount: data.amount_paid,
+      profit,
+      order_type: "data",
+      customer_phone: cleanPhone,
+      network: data.network,
+      package_size: data.package_size,
+      status: "processing",
+      paystack_reference: data.paystack_reference,
+    })
+    .select("id")
+    .single();
 
   if (orderError) throw new Error("Failed to create order");
 
@@ -61,7 +87,7 @@ export async function processDataOrderOp(userId: string, body: unknown) {
     if (response.ok) {
       await supabaseAdmin.from("orders").update({ status: "completed" }).eq("id", order.id);
 
-      if (profit > 0) {
+      if (profit > 0 && agentId) {
         const { data: wallet } = await supabaseAdmin
           .from("wallets")
           .select("total_profit")
@@ -78,17 +104,23 @@ export async function processDataOrderOp(userId: string, body: unknown) {
 
       return { success: true, order_id: order.id, api_response: result };
     } else {
-      await supabaseAdmin.from("orders").update({
-        status: "failed",
-        failure_reason: result.message || "API error",
-      }).eq("id", order.id);
+      await supabaseAdmin
+        .from("orders")
+        .update({
+          status: "failed",
+          failure_reason: result.message || "API error",
+        })
+        .eq("id", order.id);
       return { success: false, error: result.message || "Data delivery failed", order_id: order.id };
     }
   } catch {
-    await supabaseAdmin.from("orders").update({
-      status: "failed",
-      failure_reason: "Network error connecting to data provider",
-    }).eq("id", order.id);
+    await supabaseAdmin
+      .from("orders")
+      .update({
+        status: "failed",
+        failure_reason: "Network error connecting to data provider",
+      })
+      .eq("id", order.id);
     return { success: false, error: "Failed to connect to data provider", order_id: order.id };
   }
 }
@@ -137,16 +169,20 @@ export async function processWalletPurchaseOp(userId: string, body: unknown) {
 
   const profit = data.amount - data.agent_price;
 
-  const { data: order } = await supabaseAdmin.from("orders").insert({
-    agent_id: userId,
-    amount: data.amount,
-    profit: Math.max(0, profit),
-    order_type: "data",
-    customer_phone: cleanPhone,
-    network: data.network,
-    package_size: data.package_size,
-    status: "processing",
-  }).select("id").single();
+  const { data: order } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      agent_id: userId,
+      amount: data.amount,
+      profit: Math.max(0, profit),
+      order_type: "data",
+      customer_phone: cleanPhone,
+      network: data.network,
+      package_size: data.package_size,
+      status: "processing",
+    })
+    .select("id")
+    .single();
 
   try {
     const response = await fetch(DATA_API_URL, {
